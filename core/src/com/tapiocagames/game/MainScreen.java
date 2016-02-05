@@ -21,7 +21,7 @@ public class MainScreen extends ScreenAdapter {
     public static final int CELL_WIDTH = 32;
     public static final int CELL_HEIGHT = 32;
     private static final int MAX_FOOD = 3;
-    public static float walkTime = .3f;
+    public static float walkTime = 0.4f;
     Batch batch;
     ShapeRenderer shapeRenderer;
     private Texture thead;
@@ -40,6 +40,7 @@ public class MainScreen extends ScreenAdapter {
     private int numCellsX;
     private int numCellsY;
     private BodyPart newBodyPart;
+    private boolean gameOver;
 
     @Override
     public void show() {
@@ -54,10 +55,8 @@ public class MainScreen extends ScreenAdapter {
 
         Gdx.app.log("MainScreen", String.format(" width %d and height %d", width, height));
 
-        int midX = (int) (MathUtils.floor((float) (width - (width % CELL_WIDTH)) / (float) CELL_WIDTH) / 2.0f * (float) CELL_WIDTH);
-        int midY = (int) (MathUtils.floor((float) (height - (height % CELL_HEIGHT)) / (float) CELL_HEIGHT) / 2.0f * (float) CELL_HEIGHT);
-
-        Gdx.app.log("MainScreen", String.format(" head %d,%d", midX, midY));
+        int midX = (int) Math.floor(numCellsX / 2) * CELL_WIDTH;
+        int midY = (int) Math.floor(numCellsY / 2) * CELL_HEIGHT;
 
         foods = new Stack<>();
         deadFoods = new Stack<>();
@@ -70,9 +69,13 @@ public class MainScreen extends ScreenAdapter {
         tfeet = new Texture("feet.png");
         tbody = new Texture("body.png");
 
+        gameOver = false;
         dilma = new Dilma(midX, midY, thead, tchest, tfeet);
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
+
+        Gdx.app.log("show", String.format(" initial position (x,y) (%d,%d)", midX, midY));
+        Gdx.app.log("show", String.format(" head position (x,y) (%d,%d)", dilma.bodyParts.get(0).x, dilma.bodyParts.get(0).y));
 
         addFood();
         addFood();
@@ -87,6 +90,11 @@ public class MainScreen extends ScreenAdapter {
 
         queryInput();
 
+        if (gameOver) {
+            Gdx.app.log("render", "Game Over");
+            return;
+        }
+
         if (spentTime >= walkTime) {
             spentTime -= walkTime;
 
@@ -99,23 +107,20 @@ public class MainScreen extends ScreenAdapter {
 
     private void queryInput() {
 
-        boolean lPressed = Gdx.input.isKeyPressed(Input.Keys.LEFT);
-        boolean rPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT);
-        boolean uPressed = Gdx.input.isKeyPressed(Input.Keys.UP);
-        boolean dPressed = Gdx.input.isKeyPressed(Input.Keys.DOWN);
+        boolean left = Gdx.input.isKeyPressed(Input.Keys.LEFT);
+        boolean right = Gdx.input.isKeyPressed(Input.Keys.RIGHT);
+        boolean up = Gdx.input.isKeyPressed(Input.Keys.UP);
+        boolean down = Gdx.input.isKeyPressed(Input.Keys.DOWN);
 
-        BodyPart head = dilma.bodyParts.get(0);
+        BodyPart head = dilma.head();
 
-        if (lPressed) {
+        if (left && (head.direction == Dilma.UP || head.direction == Dilma.DOWN)) {
             head.direction = Dilma.LEFT;
-        }
-        if (rPressed) {
+        } else if (right && (head.direction == Dilma.UP || head.direction == Dilma.DOWN)) {
             head.direction = Dilma.RIGHT;
-        }
-        if (uPressed) {
+        } else if (up && (head.direction == Dilma.LEFT || head.direction == Dilma.RIGHT)) {
             head.direction = Dilma.UP;
-        }
-        if (dPressed) {
+        } else if (down && (head.direction == Dilma.LEFT || head.direction == Dilma.RIGHT)) {
             head.direction = Dilma.DOWN;
         }
     }
@@ -174,7 +179,7 @@ public class MainScreen extends ScreenAdapter {
             }
         }
 
-        Gdx.app.log("move", String.format("direction %d. x=%d y=%d", head.direction, head.x, head.y));
+        Gdx.app.log("move", String.format("velocity %.2f direction %d. x=%d y=%d", walkTime, head.direction, head.x, head.y));
 
         int chestDirection = getDirection(chest.x, chest.y, lastHeadX, lastHeadY);
         chest.x = lastHeadX;
@@ -215,16 +220,18 @@ public class MainScreen extends ScreenAdapter {
 
     private int getDirection(int oldX, int oldY, int newX, int newY) {
 
-        if (newX > oldX) {
+        if (newX > oldX && oldX + CELL_WIDTH < width) {
             return Dilma.RIGHT;
         } else if (newX < oldX) {
             return Dilma.LEFT;
         } else {
 
-            if (newY < oldY) {
-                return Dilma.DOWN;
-            } else {
+            Gdx.app.log("getDirection", String.format("newY=%d oldY=%d", newY, oldY));
+
+            if (newY > oldY || oldY + CELL_HEIGHT >= height) {
                 return Dilma.UP;
+            } else {
+                return Dilma.DOWN;
             }
         }
     }
@@ -232,7 +239,7 @@ public class MainScreen extends ScreenAdapter {
     private void checkCollisions() {
 
         boolean collided = false;
-        BodyPart head = dilma.bodyParts.get(0);
+        BodyPart head = dilma.head();
 
         l1:
         for (int i = 0, leni = foods.size(); i < leni; i++) {
@@ -249,14 +256,29 @@ public class MainScreen extends ScreenAdapter {
             }
         }
 
+        l1:
+        for (int i = 1, leni = dilma.bodyParts.size(); i < leni; i++) {
+
+            BodyPart bodyPart = dilma.bodyParts.get(i);
+
+            if (bodyPart.x == head.x && bodyPart.y == head.y) {
+                gameOver = true;
+                break l1;
+            }
+        }
+
+        if (gameOver) {
+            return;
+        }
+
         if (collided) {
             addBodyPart();
             addFood();
 
-            walkTime -= 0.05f;
+            walkTime -= 0.01f;
 
-            if (walkTime < 0.15f) {
-                walkTime = 0.15f;
+            if (walkTime < 0.09f) {
+                walkTime = 0.09f;
             }
         }
     }

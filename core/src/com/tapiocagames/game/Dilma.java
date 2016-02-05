@@ -40,4 +40,8 @@ public class Dilma {
         bodyParts.add(chest);
         bodyParts.add(feet);
     }
+
+    public BodyPart head() {
+        return bodyParts.get(0);
+    }
 }
