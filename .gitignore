@@ -41,3 +41,5 @@ crashlytics-build.properties
 fabric.properties
 core/build/
 core/build/
+.gradle/
+.idea/
