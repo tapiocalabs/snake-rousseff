@@ -3,6 +3,7 @@ package com.tapiocagames.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -24,6 +25,8 @@ public class MainScreen extends ScreenAdapter {
     public static float walkTime = 0.4f;
     Batch batch;
     ShapeRenderer shapeRenderer;
+    private Sound gameOverSound;
+    private Sound eatFoodSound;
     private Texture thead;
     private Texture tchest;
     private Texture tbody;
@@ -41,6 +44,7 @@ public class MainScreen extends ScreenAdapter {
     private int numCellsY;
     private BodyPart newBodyPart;
     private boolean gameOver;
+    private boolean executedGameOver;
 
     @Override
     public void show() {
@@ -70,9 +74,14 @@ public class MainScreen extends ScreenAdapter {
         tbody = new Texture("body.png");
 
         gameOver = false;
+        executedGameOver = false;
+
         dilma = new Dilma(midX, midY, thead, tchest, tfeet);
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
+
+        gameOverSound = Gdx.audio.newSound(Gdx.files.internal("game-over.ogg"));
+        eatFoodSound = Gdx.audio.newSound(Gdx.files.internal("plin.ogg"));
 
         Gdx.app.log("show", String.format(" initial position (x,y) (%d,%d)", midX, midY));
         Gdx.app.log("show", String.format(" head position (x,y) (%d,%d)", dilma.bodyParts.get(0).x, dilma.bodyParts.get(0).y));
@@ -91,7 +100,7 @@ public class MainScreen extends ScreenAdapter {
         queryInput();
 
         if (gameOver) {
-            Gdx.app.log("render", "Game Over");
+            gameOver();
             return;
         }
 
@@ -103,6 +112,18 @@ public class MainScreen extends ScreenAdapter {
         }
 
         draw();
+    }
+
+    private void gameOver() {
+
+        if (executedGameOver) {
+            return;
+        }
+
+        gameOverSound.play();
+        Gdx.app.log("render", "Game Over");
+
+        executedGameOver = true;
     }
 
     private void queryInput() {
@@ -254,6 +275,10 @@ public class MainScreen extends ScreenAdapter {
                 i--;
                 break l1;
             }
+        }
+
+        if (collided) {
+            eatFoodSound.play();
         }
 
         l1:
