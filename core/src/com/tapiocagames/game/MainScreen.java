@@ -15,6 +15,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 
 import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by thiago on 03/02/16.
@@ -24,9 +26,10 @@ public class MainScreen extends ScreenAdapter {
     public static final int CELL_WIDTH = 32;
     public static final int CELL_HEIGHT = 32;
     private static final int MAX_FOOD = 3;
-    public static float walkTime = 0.4f;
     Batch batch;
     ShapeRenderer shapeRenderer;
+    private long gameOverTimer;
+    private float walkTime;
     private BitmapFont font;
     private Sound gameOverSound;
     private Sound eatFoodSound;
@@ -34,7 +37,7 @@ public class MainScreen extends ScreenAdapter {
     private Texture tchest;
     private Texture tbody;
     private Texture tfeet;
-    private float spentTime = 0.0f;
+    private float spentTime;
     private Dilma dilma;
     private Stack<Food> foods;
     private Stack<Food> deadFoods;
@@ -42,11 +45,11 @@ public class MainScreen extends ScreenAdapter {
     private Texture foodTexture1;
     private int width;
     private int height;
-
+    private boolean restart;
     private int numCellsX;
     private int numCellsY;
     private BodyPart newBodyPart;
-    private boolean gameOver;
+    private boolean gameIsOver;
     private boolean executedGameOver;
 
     @Override
@@ -86,13 +89,16 @@ public class MainScreen extends ScreenAdapter {
         gameOverSound = Gdx.audio.newSound(Gdx.files.internal("game-over.ogg"));
         eatFoodSound = Gdx.audio.newSound(Gdx.files.internal("plin.ogg"));
 
-        restart();
+        restartGame();
     }
 
-    private void restart() {
+    private void restartGame() {
 
-        gameOver = false;
+        gameIsOver = false;
+        restart = false;
         executedGameOver = false;
+        spentTime = 0.0f;
+        walkTime = 0.4f;
 
         int midX = (int) Math.floor(numCellsX / 2) * CELL_WIDTH;
         int midY = (int) Math.floor(numCellsY / 2) * CELL_HEIGHT;
@@ -115,8 +121,13 @@ public class MainScreen extends ScreenAdapter {
 
         queryInput();
 
-        if (gameOver) {
+        if (gameIsOver) {
             gameOver();
+
+            if (restart && System.currentTimeMillis() - gameOverTimer > 7000) {
+                restartGame();
+            }
+
             return;
         }
 
@@ -136,6 +147,7 @@ public class MainScreen extends ScreenAdapter {
             return;
         }
 
+        gameOverTimer = System.currentTimeMillis();
         gameOverSound.play();
 
         String s = "Game Over";
@@ -154,6 +166,7 @@ public class MainScreen extends ScreenAdapter {
         boolean right = Gdx.input.isKeyPressed(Input.Keys.RIGHT);
         boolean up = Gdx.input.isKeyPressed(Input.Keys.UP);
         boolean down = Gdx.input.isKeyPressed(Input.Keys.DOWN);
+        boolean enter = Gdx.input.isKeyPressed(Input.Keys.ENTER);
 
         BodyPart head = dilma.head();
 
@@ -165,6 +178,10 @@ public class MainScreen extends ScreenAdapter {
             head.direction = Dilma.UP;
         } else if (down && (head.direction == Dilma.LEFT || head.direction == Dilma.RIGHT)) {
             head.direction = Dilma.DOWN;
+        } else if (enter) {
+            if (gameIsOver) {
+                restart = true;
+            }
         }
     }
 
@@ -309,12 +326,12 @@ public class MainScreen extends ScreenAdapter {
             BodyPart bodyPart = dilma.bodyParts.get(i);
 
             if (bodyPart.x == head.x && bodyPart.y == head.y) {
-                gameOver = true;
+                gameIsOver = true;
                 break l1;
             }
         }
 
-        if (gameOver) {
+        if (gameIsOver) {
             return;
         }
 
