@@ -8,7 +8,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 
@@ -25,6 +27,7 @@ public class MainScreen extends ScreenAdapter {
     public static float walkTime = 0.4f;
     Batch batch;
     ShapeRenderer shapeRenderer;
+    private BitmapFont font;
     private Sound gameOverSound;
     private Sound eatFoodSound;
     private Texture thead;
@@ -49,6 +52,13 @@ public class MainScreen extends ScreenAdapter {
     @Override
     public void show() {
 
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans-Bold.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 28;
+        font = generator.generateFont(parameter); // font size 12 pixels
+        font.setColor(Color.DARK_GRAY);
+        generator.dispose(); // don't forget to dispose to avoid memory leaks!
+
         foodTexture1 = new Texture("food1.png");
 
         height = Gdx.graphics.getHeight();
@@ -58,9 +68,6 @@ public class MainScreen extends ScreenAdapter {
         numCellsY = (int) MathUtils.floor(height / CELL_HEIGHT);
 
         Gdx.app.log("MainScreen", String.format(" width %d and height %d", width, height));
-
-        int midX = (int) Math.floor(numCellsX / 2) * CELL_WIDTH;
-        int midY = (int) Math.floor(numCellsY / 2) * CELL_HEIGHT;
 
         foods = new Stack<>();
         deadFoods = new Stack<>();
@@ -73,15 +80,24 @@ public class MainScreen extends ScreenAdapter {
         tfeet = new Texture("feet.png");
         tbody = new Texture("body.png");
 
-        gameOver = false;
-        executedGameOver = false;
-
-        dilma = new Dilma(midX, midY, thead, tchest, tfeet);
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
 
         gameOverSound = Gdx.audio.newSound(Gdx.files.internal("game-over.ogg"));
         eatFoodSound = Gdx.audio.newSound(Gdx.files.internal("plin.ogg"));
+
+        restart();
+    }
+
+    private void restart() {
+
+        gameOver = false;
+        executedGameOver = false;
+
+        int midX = (int) Math.floor(numCellsX / 2) * CELL_WIDTH;
+        int midY = (int) Math.floor(numCellsY / 2) * CELL_HEIGHT;
+
+        dilma = new Dilma(midX, midY, thead, tchest, tfeet);
 
         Gdx.app.log("show", String.format(" initial position (x,y) (%d,%d)", midX, midY));
         Gdx.app.log("show", String.format(" head position (x,y) (%d,%d)", dilma.bodyParts.get(0).x, dilma.bodyParts.get(0).y));
@@ -121,7 +137,13 @@ public class MainScreen extends ScreenAdapter {
         }
 
         gameOverSound.play();
-        Gdx.app.log("render", "Game Over");
+
+        String s = "Game Over";
+        Gdx.app.log("render", s);
+
+        batch.begin();
+        font.draw(batch, s, (width / 2) - (s.length() * font.getSpaceWidth()), height / 2);
+        batch.end();
 
         executedGameOver = true;
     }
@@ -399,6 +421,8 @@ public class MainScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
-
+        font.dispose();
+        batch.dispose();
+        shapeRenderer.dispose();
     }
 }
