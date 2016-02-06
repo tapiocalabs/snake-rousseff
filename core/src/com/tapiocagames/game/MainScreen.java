@@ -395,25 +395,28 @@ public class MainScreen extends ScreenAdapter {
             batch.draw(food.texture, food.x, food.y);
         }
 
+        for (int i = 1; i < dilma.bodyParts.size(); i++) {
+            drawBodyPart(dilma.bodyParts.get(i));
+        }
+
+        drawBodyPart(dilma.head());
+
+        batch.end();
+    }
+
+    private void drawBodyPart(BodyPart part) {
+
+        float rotation = part.direction * 90;
+        int srcWidth = part.texture.getWidth();
+        int srcHeight = part.texture.getHeight();
         int srcX = 0;
         int srcY = 0;
         boolean flipX = false;
         boolean flipY = false;
 
-        for (int i = 0; i < dilma.bodyParts.size(); i++) {
-
-            BodyPart part = dilma.bodyParts.get(i);
-
-            float rotation = part.direction * 90;
-            int srcWidth = part.texture.getWidth();
-            int srcHeight = part.texture.getHeight();
-
-            batch.draw(part.texture, part.x, part.y, part.texture.getWidth() / 2.0f, part.texture.getHeight() / 2.0f,
-                    part.texture.getWidth(), part.texture.getHeight(), 1.0f, 1.0f, rotation,
-                    srcX, srcY, srcWidth, srcHeight, flipX, flipY);
-        }
-
-        batch.end();
+        batch.draw(part.texture, part.x, part.y, part.texture.getWidth() / 2.0f, part.texture.getHeight() / 2.0f,
+                part.texture.getWidth(), part.texture.getHeight(), 1.0f, 1.0f, rotation,
+                srcX, srcY, srcWidth, srcHeight, flipX, flipY);
     }
 
     @Override
