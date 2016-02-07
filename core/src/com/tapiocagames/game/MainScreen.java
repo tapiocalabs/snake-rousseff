@@ -43,6 +43,7 @@ public class MainScreen extends ScreenAdapter {
     private Stack<Food> deadFoods;
 
     private Texture foodTexture1;
+    private int score;
     private int width;
     private int height;
     private boolean restart;
@@ -149,13 +150,6 @@ public class MainScreen extends ScreenAdapter {
 
         gameOverTimer = System.currentTimeMillis();
         gameOverSound.play();
-
-        String s = "Game Over";
-        Gdx.app.log("render", s);
-
-        batch.begin();
-        font.draw(batch, s, (width / 2) - (s.length() * font.getSpaceWidth()), height / 2);
-        batch.end();
 
         executedGameOver = true;
     }
@@ -339,6 +333,7 @@ public class MainScreen extends ScreenAdapter {
             addBodyPart();
             addFood();
 
+            score += 10;
             walkTime -= 0.01f;
 
             if (walkTime < 0.09f) {
@@ -400,8 +395,24 @@ public class MainScreen extends ScreenAdapter {
         }
 
         drawBodyPart(dilma.head());
+        drawScore();
+
+        if (gameIsOver) {
+
+            String s = "Game Over";
+            Gdx.app.log("render", s);
+            font.draw(batch, s, (width / 2) - (s.length() * font.getSpaceWidth()), height / 2);
+        }
+
+        drawScore();
 
         batch.end();
+    }
+
+    private void drawScore() {
+
+        String s = "SCORE: " + score;
+        font.draw(batch, s, font.getSpaceWidth(), height - font.getCapHeight());
     }
 
     private void drawBodyPart(BodyPart part) {
