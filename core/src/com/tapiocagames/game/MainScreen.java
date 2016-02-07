@@ -15,8 +15,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 
 import java.util.Stack;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by thiago on 03/02/16.
@@ -26,8 +24,8 @@ public class MainScreen extends ScreenAdapter {
     public static final int CELL_WIDTH = 32;
     public static final int CELL_HEIGHT = 32;
     private static final int MAX_FOOD = 3;
-    Batch batch;
-    ShapeRenderer shapeRenderer;
+    private Batch batch;
+    private ShapeRenderer shapeRenderer;
     private long gameOverTimer;
     private float walkTime;
     private BitmapFont font;
@@ -39,7 +37,7 @@ public class MainScreen extends ScreenAdapter {
     private Texture tbody;
     private Texture tfeet;
     private float spentTime;
-    private Dilma dilma;
+    private Snake snake;
     private Stack<Food> foods;
     private Stack<Food> deadFoods;
 
@@ -117,10 +115,10 @@ public class MainScreen extends ScreenAdapter {
         int midX = (int) Math.floor(numCellsX / 2) * CELL_WIDTH;
         int midY = (int) Math.floor(numCellsY / 2) * CELL_HEIGHT;
 
-        dilma = new Dilma(midX, midY, thead, tchest, tfeet);
+        snake = new Snake(midX, midY, thead, tchest, tfeet);
 
         Gdx.app.log("show", String.format(" initial position (x,y) (%d,%d)", midX, midY));
-        Gdx.app.log("show", String.format(" head position (x,y) (%d,%d)", dilma.bodyParts.get(0).x, dilma.bodyParts.get(0).y));
+        Gdx.app.log("show", String.format(" head position (x,y) (%d,%d)", snake.bodyParts.get(0).x, snake.bodyParts.get(0).y));
 
         addFood();
         addFood();
@@ -175,16 +173,16 @@ public class MainScreen extends ScreenAdapter {
         boolean down = Gdx.input.isKeyPressed(Input.Keys.DOWN);
         boolean enter = Gdx.input.isKeyPressed(Input.Keys.ENTER);
 
-        BodyPart head = dilma.head();
+        BodyPart head = snake.head();
 
-        if (left && (head.direction == Dilma.UP || head.direction == Dilma.DOWN)) {
-            head.direction = Dilma.LEFT;
-        } else if (right && (head.direction == Dilma.UP || head.direction == Dilma.DOWN)) {
-            head.direction = Dilma.RIGHT;
-        } else if (up && (head.direction == Dilma.LEFT || head.direction == Dilma.RIGHT)) {
-            head.direction = Dilma.UP;
-        } else if (down && (head.direction == Dilma.LEFT || head.direction == Dilma.RIGHT)) {
-            head.direction = Dilma.DOWN;
+        if (left && (head.direction == Snake.UP || head.direction == Snake.DOWN)) {
+            head.direction = Snake.LEFT;
+        } else if (right && (head.direction == Snake.UP || head.direction == Snake.DOWN)) {
+            head.direction = Snake.RIGHT;
+        } else if (up && (head.direction == Snake.LEFT || head.direction == Snake.RIGHT)) {
+            head.direction = Snake.UP;
+        } else if (down && (head.direction == Snake.LEFT || head.direction == Snake.RIGHT)) {
+            head.direction = Snake.DOWN;
         } else if (enter) {
             if (gameIsOver) {
                 restart = true;
@@ -194,16 +192,16 @@ public class MainScreen extends ScreenAdapter {
 
     private void move() {
 
-        BodyPart head = dilma.bodyParts.get(0);
-        BodyPart chest = dilma.bodyParts.get(1);
-        BodyPart feet = dilma.bodyParts.get(dilma.bodyParts.size() - 1);
+        BodyPart head = snake.bodyParts.get(0);
+        BodyPart chest = snake.bodyParts.get(1);
+        BodyPart feet = snake.bodyParts.get(snake.bodyParts.size() - 1);
 
-        BodyPart lastBody = dilma.bodyParts.get(dilma.bodyParts.size() - 2); // may be the chest
+        BodyPart lastBody = snake.bodyParts.get(snake.bodyParts.size() - 2); // may be the chest
         boolean lastBodyIsTheChest = lastBody.x == chest.x && lastBody.y == chest.y;
 
         boolean justAdded = newBodyPart != null;
 
-        BodyPart beforeLastBody = dilma.bodyParts.get(dilma.bodyParts.size() - 3); // may be the chest
+        BodyPart beforeLastBody = snake.bodyParts.get(snake.bodyParts.size() - 3); // may be the chest
         int beforeLastBodyY = beforeLastBody.y;
         int beforeLastBodyX = beforeLastBody.x;
 
@@ -216,28 +214,28 @@ public class MainScreen extends ScreenAdapter {
         int lastBodyX = lastBody.x;
         int lastBodyY = lastBody.y;
 
-        if (head.direction == Dilma.UP) {
+        if (head.direction == Snake.UP) {
 
             head.y += CELL_HEIGHT;
 
             if (head.y >= height) {
                 head.y = 0;
             }
-        } else if (head.direction == Dilma.RIGHT) {
+        } else if (head.direction == Snake.RIGHT) {
 
             head.x += CELL_WIDTH;
 
             if (head.x >= width) {
                 head.x = 0;
             }
-        } else if (head.direction == Dilma.DOWN) {
+        } else if (head.direction == Snake.DOWN) {
 
             head.y -= CELL_HEIGHT;
 
             if (head.y < 0) {
                 head.y = height - CELL_HEIGHT;
             }
-        } else if (head.direction == Dilma.LEFT) {
+        } else if (head.direction == Snake.LEFT) {
 
             head.x -= CELL_WIDTH;
 
@@ -258,10 +256,10 @@ public class MainScreen extends ScreenAdapter {
             newBodyPart.x = chestX;
             newBodyPart.y = chestY;
 
-            dilma.bodyParts.add(2, newBodyPart);
+            snake.bodyParts.add(2, newBodyPart);
 
-            if (dilma.bodyParts.size() > 4) {
-                dilma.bodyParts.set(dilma.bodyParts.size() - 2, lastBody);
+            if (snake.bodyParts.size() > 4) {
+                snake.bodyParts.set(snake.bodyParts.size() - 2, lastBody);
             }
 
             newBodyPart = null;
@@ -274,8 +272,8 @@ public class MainScreen extends ScreenAdapter {
                 lastBody.y = chestY;
                 lastBody.direction = lastBodyDirection;
 
-                dilma.bodyParts.remove(dilma.bodyParts.size() - 2);
-                dilma.bodyParts.add(2, lastBody);
+                snake.bodyParts.remove(snake.bodyParts.size() - 2);
+                snake.bodyParts.add(2, lastBody);
             }
 
             int feetDirection = getDirection(feet.x, feet.y, lastBodyX, lastBodyY);
@@ -288,17 +286,17 @@ public class MainScreen extends ScreenAdapter {
     private int getDirection(int oldX, int oldY, int newX, int newY) {
 
         if (newX > oldX && oldX + CELL_WIDTH < width) {
-            return Dilma.RIGHT;
+            return Snake.RIGHT;
         } else if (newX < oldX) {
-            return Dilma.LEFT;
+            return Snake.LEFT;
         } else {
 
             Gdx.app.log("getDirection", String.format("newY=%d oldY=%d", newY, oldY));
 
             if (newY > oldY || oldY + CELL_HEIGHT >= height) {
-                return Dilma.UP;
+                return Snake.UP;
             } else {
-                return Dilma.DOWN;
+                return Snake.DOWN;
             }
         }
     }
@@ -306,7 +304,7 @@ public class MainScreen extends ScreenAdapter {
     private void checkCollisions() {
 
         boolean collided = false;
-        BodyPart head = dilma.head();
+        BodyPart head = snake.head();
 
         l1:
         for (int i = 0, leni = foods.size(); i < leni; i++) {
@@ -328,9 +326,9 @@ public class MainScreen extends ScreenAdapter {
         }
 
         l1:
-        for (int i = 1, leni = dilma.bodyParts.size(); i < leni; i++) {
+        for (int i = 1, leni = snake.bodyParts.size(); i < leni; i++) {
 
-            BodyPart bodyPart = dilma.bodyParts.get(i);
+            BodyPart bodyPart = snake.bodyParts.get(i);
 
             if (bodyPart.x == head.x && bodyPart.y == head.y) {
                 gameIsOver = true;
@@ -357,7 +355,7 @@ public class MainScreen extends ScreenAdapter {
 
     private void addBodyPart() {
 
-        BodyPart feet = dilma.bodyParts.get(dilma.bodyParts.size() - 1);
+        BodyPart feet = snake.bodyParts.get(snake.bodyParts.size() - 1);
 
         newBodyPart = new BodyPart(feet.x, feet.y);
         newBodyPart.color = Color.RED;
@@ -388,7 +386,7 @@ public class MainScreen extends ScreenAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 //        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-//        for (BodyPart part : dilma.bodyParts) {
+//        for (BodyPart part : snake.bodyParts) {
 //
 //            if (part.color != null) {
 //                shapeRenderer.setColor(part.color);
@@ -403,11 +401,11 @@ public class MainScreen extends ScreenAdapter {
             batch.draw(food.texture, food.x, food.y);
         }
 
-        for (int i = 1; i < dilma.bodyParts.size(); i++) {
-            drawBodyPart(dilma.bodyParts.get(i));
+        for (int i = 1; i < snake.bodyParts.size(); i++) {
+            drawBodyPart(snake.bodyParts.get(i));
         }
 
-        drawBodyPart(dilma.head());
+        drawBodyPart(snake.head());
         drawScore();
 
         if (gameIsOver) {

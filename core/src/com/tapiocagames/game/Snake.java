@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by thiago on 03/02/16.
  */
-public class Dilma {
+public class Snake {
 
     public static final int UP = 0;
     public static final int LEFT = 1;
@@ -19,7 +19,7 @@ public class Dilma {
 
     List<BodyPart> bodyParts;
 
-    public Dilma(int x, int y, Texture thead, Texture tchest, Texture tfeet) {
+    public Snake(int x, int y, Texture thead, Texture tchest, Texture tfeet) {
 
         bodyParts = new LinkedList<>();
 
