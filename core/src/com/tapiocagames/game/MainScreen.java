@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -51,6 +52,7 @@ public class MainScreen extends ScreenAdapter {
     private BodyPart newBodyPart;
     private boolean gameIsOver;
     private boolean executedGameOver;
+    private GlyphLayout glyphLayout;
 
     @Override
     public void show() {
@@ -94,8 +96,10 @@ public class MainScreen extends ScreenAdapter {
         tfeet = new Texture("feet.png");
         tbody = new Texture("body.png");
 
+        glyphLayout = new GlyphLayout();
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
+        snake = new Snake();
 
         gameOverSound = Gdx.audio.newSound(Gdx.files.internal("game-over.ogg"));
         eatFoodSound = Gdx.audio.newSound(Gdx.files.internal("plin.ogg"));
@@ -115,7 +119,7 @@ public class MainScreen extends ScreenAdapter {
         int midX = (int) Math.floor(numCellsX / 2) * CELL_WIDTH;
         int midY = (int) Math.floor(numCellsY / 2) * CELL_HEIGHT;
 
-        snake = new Snake(midX, midY, thead, tchest, tfeet);
+        snake.setup(midX, midY, thead, tchest, tfeet);
 
         Gdx.app.log("show", String.format(" initial position (x,y) (%d,%d)", midX, midY));
         Gdx.app.log("show", String.format(" head position (x,y) (%d,%d)", snake.bodyParts.get(0).x, snake.bodyParts.get(0).y));
@@ -205,12 +209,15 @@ public class MainScreen extends ScreenAdapter {
         int beforeLastBodyY = beforeLastBody.y;
         int beforeLastBodyX = beforeLastBody.x;
 
+        int lastHeadDirection = head.direction;
         int lastHeadY = head.y;
         int lastHeadX = head.x;
 
+        int chestDirection = chest.direction;
         int chestX = chest.x;
         int chestY = chest.y;
 
+        int lastBodyDirection = lastBody.direction;
         int lastBodyX = lastBody.x;
         int lastBodyY = lastBody.y;
 
@@ -246,15 +253,15 @@ public class MainScreen extends ScreenAdapter {
 
         Gdx.app.log("move", String.format("velocity %.2f direction %d. x=%d y=%d", walkTime, head.direction, head.x, head.y));
 
-        int chestDirection = getDirection(chest.x, chest.y, lastHeadX, lastHeadY);
         chest.x = lastHeadX;
         chest.y = lastHeadY;
-        chest.direction = chestDirection;
+        chest.direction = lastHeadDirection;
 
         if (justAdded) {
 
             newBodyPart.x = chestX;
             newBodyPart.y = chestY;
+            newBodyPart.direction = chestDirection;
 
             snake.bodyParts.add(2, newBodyPart);
 
@@ -267,37 +274,17 @@ public class MainScreen extends ScreenAdapter {
 
             if (!lastBodyIsTheChest) {
 
-                int lastBodyDirection = getDirection(lastBody.x, lastBody.y, chestX, chestY);
                 lastBody.x = chestX;
                 lastBody.y = chestY;
-                lastBody.direction = lastBodyDirection;
+                lastBody.direction = chestDirection;
 
                 snake.bodyParts.remove(snake.bodyParts.size() - 2);
                 snake.bodyParts.add(2, lastBody);
             }
 
-            int feetDirection = getDirection(feet.x, feet.y, lastBodyX, lastBodyY);
             feet.x = lastBodyX;
             feet.y = lastBodyY;
-            feet.direction = feetDirection;
-        }
-    }
-
-    private int getDirection(int oldX, int oldY, int newX, int newY) {
-
-        if (newX > oldX && oldX + CELL_WIDTH < width) {
-            return Snake.RIGHT;
-        } else if (newX < oldX) {
-            return Snake.LEFT;
-        } else {
-
-            Gdx.app.log("getDirection", String.format("newY=%d oldY=%d", newY, oldY));
-
-            if (newY > oldY || oldY + CELL_HEIGHT >= height) {
-                return Snake.UP;
-            } else {
-                return Snake.DOWN;
-            }
+            feet.direction = lastBodyDirection;
         }
     }
 
@@ -411,8 +398,12 @@ public class MainScreen extends ScreenAdapter {
         if (gameIsOver) {
 
             String s = "Game Over";
-            Gdx.app.log("render", s);
-            font.draw(batch, s, (width / 2) - (s.length() * font.getSpaceWidth()), height / 2);
+
+            glyphLayout.reset();
+            glyphLayout.setText(font, s);
+
+            Gdx.app.log("render ", s + " at " + ((height / 2) + (glyphLayout.height / 2)));
+            font.draw(batch, s, (width / 2) - (glyphLayout.width / 2), (height / 2) + (glyphLayout.height / 2));
         }
 
         drawScore();
@@ -423,7 +414,11 @@ public class MainScreen extends ScreenAdapter {
     private void drawScore() {
 
         String s = "SCORE: " + score;
-        scoreFont.draw(batch, s, scoreFont.getSpaceWidth(), height - scoreFont.getCapHeight());
+
+        glyphLayout.reset();
+        glyphLayout.setText(scoreFont, s);
+
+        scoreFont.draw(batch, s, scoreFont.getSpaceWidth(), height - glyphLayout.height);
     }
 
     private void drawBodyPart(BodyPart part) {

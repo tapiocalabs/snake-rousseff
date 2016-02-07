@@ -19,26 +19,47 @@ public class Snake {
 
     List<BodyPart> bodyParts;
 
-    public Snake(int x, int y, Texture thead, Texture tchest, Texture tfeet) {
+    public Snake() {
 
         bodyParts = new LinkedList<>();
 
-        BodyPart head = new BodyPart(x, y);
+        BodyPart head = new BodyPart(0, 0);
         head.color = Color.DARK_GRAY;
-        head.texture = thead;
-        head.direction = UP;
-        BodyPart chest = new BodyPart(x, y - (MainScreen.CELL_HEIGHT * 1));
+
+        BodyPart chest = new BodyPart(0, 0);
         chest.color = Color.CORAL;
-        chest.texture = tchest;
-        chest.direction = UP;
-        BodyPart feet = new BodyPart(x, y - (MainScreen.CELL_HEIGHT * 2));
+
+        BodyPart feet = new BodyPart(0, 0);
         feet.color = Color.ORANGE;
-        feet.texture = tfeet;
-        chest.direction = UP;
 
         bodyParts.add(head);
         bodyParts.add(chest);
         bodyParts.add(feet);
+    }
+
+    public void setup(int x, int y, Texture thead, Texture tchest, Texture tfeet) {
+
+        while (bodyParts.size() > 3) {
+            bodyParts.remove(bodyParts.size() - 2);
+        }
+
+        BodyPart head = bodyParts.get(0);
+        head.texture = thead;
+        head.x = x;
+        head.y = y;
+        head.direction = UP;
+
+        BodyPart chest = bodyParts.get(1);
+        chest.texture = tchest;
+        chest.x = x;
+        chest.y = y - (MainScreen.CELL_HEIGHT * 1);
+        chest.direction = UP;
+
+        BodyPart feet = bodyParts.get(2);
+        feet.texture = tfeet;
+        feet.x = x;
+        feet.y = y - (MainScreen.CELL_HEIGHT * 2);
+        feet.direction = UP;
     }
 
     public BodyPart head() {
