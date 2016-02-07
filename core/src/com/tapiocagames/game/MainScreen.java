@@ -31,6 +31,7 @@ public class MainScreen extends ScreenAdapter {
     private long gameOverTimer;
     private float walkTime;
     private BitmapFont font;
+    private BitmapFont scoreFont;
     private Sound gameOverSound;
     private Sound eatFoodSound;
     private Texture thead;
@@ -56,12 +57,23 @@ public class MainScreen extends ScreenAdapter {
     @Override
     public void show() {
 
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans-Bold.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 28;
-        font = generator.generateFont(parameter); // font size 12 pixels
-        font.setColor(Color.DARK_GRAY);
-        generator.dispose(); // don't forget to dispose to avoid memory leaks!
+        {
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("UbuntuMono-B.ttf"));
+            FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+            parameter.size = 28;
+            scoreFont = generator.generateFont(parameter); // font size 12 pixels
+            scoreFont.setColor(Color.WHITE);
+            generator.dispose(); // don't forget to dispose to avoid memory leaks!
+        }
+
+        {
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans-Bold.ttf"));
+            FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+            parameter.size = 28;
+            font = generator.generateFont(parameter); // font size 12 pixels
+            font.setColor(Color.DARK_GRAY);
+            generator.dispose(); // don't forget to dispose to avoid memory leaks!
+        }
 
         foodTexture1 = new Texture("food1.png");
 
@@ -97,6 +109,7 @@ public class MainScreen extends ScreenAdapter {
 
         gameIsOver = false;
         restart = false;
+        score = 0;
         executedGameOver = false;
         spentTime = 0.0f;
         walkTime = 0.4f;
@@ -412,7 +425,7 @@ public class MainScreen extends ScreenAdapter {
     private void drawScore() {
 
         String s = "SCORE: " + score;
-        font.draw(batch, s, font.getSpaceWidth(), height - font.getCapHeight());
+        scoreFont.draw(batch, s, scoreFont.getSpaceWidth(), height - scoreFont.getCapHeight());
     }
 
     private void drawBodyPart(BodyPart part) {
