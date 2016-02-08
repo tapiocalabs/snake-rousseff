@@ -8,14 +8,14 @@ import com.badlogic.gdx.graphics.Texture;
  */
 public class BodyPart {
 
-    int x;
-    int y;
+    float x;
+    float y;
     Texture texture;
     int direction;
 
     Color color;
 
-    public BodyPart(int x, int y) {
+    public BodyPart(float x, float y) {
         this.x = x;
         this.y = y;
     }

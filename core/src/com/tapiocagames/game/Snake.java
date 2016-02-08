@@ -37,7 +37,7 @@ public class Snake {
         bodyParts.add(feet);
     }
 
-    public void setup(int x, int y, Texture thead, Texture tchest, Texture tfeet) {
+    public void setup(float x, float y, Texture thead, Texture tchest, Texture tfeet) {
 
         while (bodyParts.size() > 3) {
             bodyParts.remove(bodyParts.size() - 2);

@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -14,6 +16,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.Stack;
 
@@ -22,10 +26,12 @@ import java.util.Stack;
  */
 public class MainScreen extends ScreenAdapter {
 
-    public static final int CELL_WIDTH = 32;
-    public static final int CELL_HEIGHT = 32;
+    public static final float CELL_WIDTH = 32.0f;
+    public static final float CELL_HEIGHT = 32.0f;
     private static final int MAX_FOOD = 3;
     private static final float MINIMUM_WALK_TIME = 0.076f;
+    private static final float WORLD_WIDTH = 640.0f;
+    private static final float WORLD_HEIGHT = 480.0f;
     private Batch batch;
     private ShapeRenderer shapeRenderer;
     private long gameOverTimer;
@@ -42,12 +48,9 @@ public class MainScreen extends ScreenAdapter {
     private Texture tfeet;
     private Snake snake;
     private Stack<Food> foods;
-
     private Stack<Food> deadFoods;
     private Texture foodTexture1;
     private int score;
-    private int width;
-    private int height;
     private boolean restart;
     private int numCellsX;
     private int numCellsY;
@@ -56,11 +59,20 @@ public class MainScreen extends ScreenAdapter {
     private boolean executedGameOver;
     private GlyphLayout glyphLayout;
 
+    private Camera camera;
+    private Viewport viewport;
+
     @Override
     public void show() {
 
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
+        camera.update();
+
+        viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
+
         {
-//            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("UbuntuMono-B.ttf"));
+            //            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("UbuntuMono-B.ttf"));
             FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("arcade-classic.ttf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
             parameter.size = 28;
@@ -81,13 +93,10 @@ public class MainScreen extends ScreenAdapter {
 
         foodTexture1 = new Texture("food1.png");
 
-        height = Gdx.graphics.getHeight();
-        width = Gdx.graphics.getWidth();
+        numCellsX = (int) MathUtils.floor(viewport.getWorldWidth() / CELL_WIDTH);
+        numCellsY = (int) MathUtils.floor(viewport.getWorldHeight() / CELL_HEIGHT);
 
-        numCellsX = (int) MathUtils.floor(width / CELL_WIDTH);
-        numCellsY = (int) MathUtils.floor(height / CELL_HEIGHT);
-
-        Gdx.app.log("MainScreen", String.format(" width %d and height %d", width, height));
+        Gdx.app.log("MainScreen", String.format(" WORLD_WIDTH %.2f and viewport.getWorldHeight() %.2f", viewport.getWorldWidth(), viewport.getWorldHeight()));
 
         foods = new Stack<>();
         deadFoods = new Stack<>();
@@ -121,13 +130,13 @@ public class MainScreen extends ScreenAdapter {
         spentTime = 0.0f;
         walkTime = 0.4f;
 
-        int midX = (int) Math.floor(numCellsX / 2) * CELL_WIDTH;
-        int midY = (int) Math.floor(numCellsY / 2) * CELL_HEIGHT;
+        float midX = (int) Math.floor(numCellsX / 2) * CELL_WIDTH;
+        float midY = (int) Math.floor(numCellsY / 2) * CELL_HEIGHT;
 
         snake.setup(midX, midY, thead, tchest, tfeet);
 
-        Gdx.app.log("show", String.format(" initial position (x,y) (%d,%d)", midX, midY));
-        Gdx.app.log("show", String.format(" head position (x,y) (%d,%d)", snake.bodyParts.get(0).x, snake.bodyParts.get(0).y));
+        Gdx.app.log("show", String.format(" initial position (x,y) (%.2f,%.2f)", midX, midY));
+        Gdx.app.log("show", String.format(" head position (x,y) (%.2f,%.2f)", snake.bodyParts.get(0).x, snake.bodyParts.get(0).y));
 
         for (int i = 0; i < MAX_FOOD; i++)
             addFood();
@@ -211,33 +220,33 @@ public class MainScreen extends ScreenAdapter {
         boolean justAdded = newBodyPart != null;
 
         BodyPart beforeLastBody = snake.bodyParts.get(snake.bodyParts.size() - 3); // may be the chest
-        int beforeLastBodyY = beforeLastBody.y;
-        int beforeLastBodyX = beforeLastBody.x;
+        float beforeLastBodyY = beforeLastBody.y;
+        float beforeLastBodyX = beforeLastBody.x;
 
         int lastHeadDirection = head.direction;
-        int lastHeadY = head.y;
-        int lastHeadX = head.x;
+        float lastHeadY = head.y;
+        float lastHeadX = head.x;
 
         int chestDirection = chest.direction;
-        int chestX = chest.x;
-        int chestY = chest.y;
+        float chestX = chest.x;
+        float chestY = chest.y;
 
         int lastBodyDirection = lastBody.direction;
-        int lastBodyX = lastBody.x;
-        int lastBodyY = lastBody.y;
+        float lastBodyX = lastBody.x;
+        float lastBodyY = lastBody.y;
 
         if (head.direction == Snake.UP) {
 
             head.y += CELL_HEIGHT;
 
-            if (head.y >= height) {
+            if (head.y >= viewport.getWorldHeight()) {
                 head.y = 0;
             }
         } else if (head.direction == Snake.RIGHT) {
 
             head.x += CELL_WIDTH;
 
-            if (head.x >= width) {
+            if (head.x >= viewport.getWorldWidth()) {
                 head.x = 0;
             }
         } else if (head.direction == Snake.DOWN) {
@@ -245,18 +254,18 @@ public class MainScreen extends ScreenAdapter {
             head.y -= CELL_HEIGHT;
 
             if (head.y < 0) {
-                head.y = height - CELL_HEIGHT;
+                head.y = viewport.getWorldHeight() - CELL_HEIGHT;
             }
         } else if (head.direction == Snake.LEFT) {
 
             head.x -= CELL_WIDTH;
 
             if (head.x < 0) {
-                head.x = width - CELL_WIDTH;
+                head.x = viewport.getWorldWidth() - CELL_WIDTH;
             }
         }
 
-        Gdx.app.log("move", String.format("velocity %.2f direction %d. x=%d y=%d", walkTime, head.direction, head.x, head.y));
+        Gdx.app.log("move", String.format("velocity %.2f direction %d. x=%.2f y=%.2f", walkTime, head.direction, head.x, head.y));
 
         chest.x = lastHeadX;
         chest.y = lastHeadY;
@@ -362,8 +371,8 @@ public class MainScreen extends ScreenAdapter {
 
         Food food = deadFoods.pop();
 
-        int x = 0;
-        int y = 0;
+        float x = 0;
+        float y = 0;
 
         boolean collision = false;
 
@@ -385,7 +394,7 @@ public class MainScreen extends ScreenAdapter {
 
         food.set(x, y, foodTexture1);
 
-        Gdx.app.log("addFood", String.format("x=%d, y=%d", x, y));
+        Gdx.app.log("addFood", String.format("x=%.2f, y=%.2f", x, y));
 
         foods.add(food);
     }
@@ -424,8 +433,8 @@ public class MainScreen extends ScreenAdapter {
             glyphLayout.reset();
             glyphLayout.setText(font, s);
 
-            Gdx.app.log("render ", s + " at " + ((height / 2) + (glyphLayout.height / 2)));
-            font.draw(batch, s, (width / 2) - (glyphLayout.width / 2), (height / 2) + (glyphLayout.height / 2));
+            Gdx.app.log("render ", s + " at " + ((viewport.getWorldHeight() / 2) + (glyphLayout.height / 2)));
+            font.draw(batch, s, (viewport.getWorldWidth() / 2) - (glyphLayout.width / 2), (viewport.getWorldHeight() / 2) + (glyphLayout.height / 2));
         }
 
         drawScore();
@@ -441,7 +450,7 @@ public class MainScreen extends ScreenAdapter {
         glyphLayout.reset();
         glyphLayout.setText(scoreFont, s);
 
-        scoreFont.draw(batch, s, scoreFont.getSpaceWidth(), height - glyphLayout.height);
+        scoreFont.draw(batch, s, scoreFont.getSpaceWidth(), viewport.getWorldHeight() - glyphLayout.height);
     }
 
     private void drawTime() {
@@ -451,7 +460,7 @@ public class MainScreen extends ScreenAdapter {
         glyphLayout.reset();
         glyphLayout.setText(scoreFont, s);
 
-        scoreFont.draw(batch, s, width - glyphLayout.width - scoreFont.getSpaceWidth(), height - glyphLayout.height);
+        scoreFont.draw(batch, s, viewport.getWorldWidth() - glyphLayout.width - scoreFont.getSpaceWidth(), viewport.getWorldHeight() - glyphLayout.height);
     }
 
     private void drawBodyPart(BodyPart part) {
