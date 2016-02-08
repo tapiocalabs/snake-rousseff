@@ -59,7 +59,7 @@ public class MainScreen extends ScreenAdapter {
     private boolean executedGameOver;
     private GlyphLayout glyphLayout;
 
-    private Camera camera;
+    private OrthographicCamera camera;
     private Viewport viewport;
 
     @Override
@@ -68,6 +68,10 @@ public class MainScreen extends ScreenAdapter {
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
         camera.update();
+
+//        camera.zoom = 1.1f;
+//        camera.update();
+//        cam.zoom = MathUtils.clamp(cam.zoom, 0.1f, 100/cam.viewportWidth);
 
         viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
 
@@ -96,7 +100,8 @@ public class MainScreen extends ScreenAdapter {
         numCellsX = (int) MathUtils.floor(viewport.getWorldWidth() / CELL_WIDTH);
         numCellsY = (int) MathUtils.floor(viewport.getWorldHeight() / CELL_HEIGHT);
 
-        Gdx.app.log("MainScreen", String.format(" WORLD_WIDTH %.2f and viewport.getWorldHeight() %.2f", viewport.getWorldWidth(), viewport.getWorldHeight()));
+        Gdx.app.log("MainScreen", String.format("WORLD_WIDTH %.2f and WORLD_HEIGHT %.2f", viewport.getWorldWidth(), viewport.getWorldHeight()));
+        Gdx.app.log("MainScreen", String.format("ZOOM %.2f ", camera.zoom));
 
         foods = new Stack<>();
         deadFoods = new Stack<>();
@@ -403,6 +408,9 @@ public class MainScreen extends ScreenAdapter {
 
         Gdx.gl.glClearColor(0.4f, 1, 0.4f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        batch.setProjectionMatrix(camera.projection);
+        batch.setTransformMatrix(camera.view);
 
 //        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 //        for (BodyPart part : snake.bodyParts) {
