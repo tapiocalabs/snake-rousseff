@@ -24,7 +24,7 @@ public class MainScreen extends ScreenAdapter {
 
     public static final int CELL_WIDTH = 32;
     public static final int CELL_HEIGHT = 32;
-    private static final int MAX_FOOD = 46;
+    private static final int MAX_FOOD = 3;
     private static final float MINIMUM_WALK_TIME = 0.076f;
     private Batch batch;
     private ShapeRenderer shapeRenderer;
