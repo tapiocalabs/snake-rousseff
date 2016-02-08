@@ -24,11 +24,14 @@ public class MainScreen extends ScreenAdapter {
 
     public static final int CELL_WIDTH = 32;
     public static final int CELL_HEIGHT = 32;
-    private static final int MAX_FOOD = 3;
+    private static final int MAX_FOOD = 46;
+    private static final float MINIMUM_WALK_TIME = 0.076f;
     private Batch batch;
     private ShapeRenderer shapeRenderer;
     private long gameOverTimer;
     private float walkTime;
+    private float time;
+    private float spentTime;
     private BitmapFont font;
     private BitmapFont scoreFont;
     private Sound gameOverSound;
@@ -37,11 +40,10 @@ public class MainScreen extends ScreenAdapter {
     private Texture tchest;
     private Texture tbody;
     private Texture tfeet;
-    private float spentTime;
     private Snake snake;
     private Stack<Food> foods;
-    private Stack<Food> deadFoods;
 
+    private Stack<Food> deadFoods;
     private Texture foodTexture1;
     private int score;
     private int width;
@@ -58,19 +60,21 @@ public class MainScreen extends ScreenAdapter {
     public void show() {
 
         {
-            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("UbuntuMono-B.ttf"));
+//            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("UbuntuMono-B.ttf"));
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("arcade-classic.ttf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
             parameter.size = 28;
-            scoreFont = generator.generateFont(parameter); // font size 12 pixels
-            scoreFont.setColor(Color.WHITE);
+            scoreFont = generator.generateFont(parameter);
+            scoreFont.setColor(Color.GOLDENROD);
             generator.dispose(); // don't forget to dispose to avoid memory leaks!
         }
 
         {
-            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans-Bold.ttf"));
+//            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans-Bold.ttf"));
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("arcade-classic.ttf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            parameter.size = 28;
-            font = generator.generateFont(parameter); // font size 12 pixels
+            parameter.size = 36;
+            font = generator.generateFont(parameter);
             font.setColor(Color.DARK_GRAY);
             generator.dispose(); // don't forget to dispose to avoid memory leaks!
         }
@@ -112,6 +116,7 @@ public class MainScreen extends ScreenAdapter {
         gameIsOver = false;
         restart = false;
         score = 0;
+        time = 0;
         executedGameOver = false;
         spentTime = 0.0f;
         walkTime = 0.4f;
@@ -124,9 +129,8 @@ public class MainScreen extends ScreenAdapter {
         Gdx.app.log("show", String.format(" initial position (x,y) (%d,%d)", midX, midY));
         Gdx.app.log("show", String.format(" head position (x,y) (%d,%d)", snake.bodyParts.get(0).x, snake.bodyParts.get(0).y));
 
-        addFood();
-        addFood();
-        addFood();
+        for (int i = 0; i < MAX_FOOD; i++)
+            addFood();
     }
 
     @Override
@@ -134,6 +138,7 @@ public class MainScreen extends ScreenAdapter {
         super.render(delta);
 
         spentTime += delta;
+        time += delta;
 
         queryInput();
 
@@ -334,8 +339,8 @@ public class MainScreen extends ScreenAdapter {
             score += 10;
             walkTime -= 0.01f;
 
-            if (walkTime < 0.09f) {
-                walkTime = 0.09f;
+            if (walkTime < MINIMUM_WALK_TIME) {
+                walkTime = MINIMUM_WALK_TIME;
             }
         }
     }
@@ -357,8 +362,26 @@ public class MainScreen extends ScreenAdapter {
 
         Food food = deadFoods.pop();
 
-        int x = (int) (MathUtils.floor(MathUtils.random() * (float) numCellsX) * CELL_WIDTH);
-        int y = (int) (MathUtils.floor(MathUtils.random() * (float) numCellsY) * CELL_HEIGHT);
+        int x = 0;
+        int y = 0;
+
+        boolean collision = false;
+
+        do {
+
+            collision = false;
+            x = (int) (MathUtils.floor(MathUtils.random() * (float) numCellsX) * CELL_WIDTH);
+            y = (int) (MathUtils.floor(MathUtils.random() * (float) numCellsY) * CELL_HEIGHT);
+
+            for (int i = 0, leni = snake.bodyParts.size(); i < leni && collision == false; i++) {
+
+                BodyPart bodyPart = snake.bodyParts.get(i);
+
+                if (bodyPart.x == x && bodyPart.y == y) {
+                    collision = true;
+                }
+            }
+        } while (collision);
 
         food.set(x, y, foodTexture1);
 
@@ -393,7 +416,6 @@ public class MainScreen extends ScreenAdapter {
         }
 
         drawBodyPart(snake.head());
-        drawScore();
 
         if (gameIsOver) {
 
@@ -407,6 +429,7 @@ public class MainScreen extends ScreenAdapter {
         }
 
         drawScore();
+        drawTime();
 
         batch.end();
     }
@@ -419,6 +442,16 @@ public class MainScreen extends ScreenAdapter {
         glyphLayout.setText(scoreFont, s);
 
         scoreFont.draw(batch, s, scoreFont.getSpaceWidth(), height - glyphLayout.height);
+    }
+
+    private void drawTime() {
+
+        String s = "TIME: " + (int) Math.floor(time);
+
+        glyphLayout.reset();
+        glyphLayout.setText(scoreFont, s);
+
+        scoreFont.draw(batch, s, width - glyphLayout.width - scoreFont.getSpaceWidth(), height - glyphLayout.height);
     }
 
     private void drawBodyPart(BodyPart part) {
