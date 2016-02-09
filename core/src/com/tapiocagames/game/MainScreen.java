@@ -367,7 +367,7 @@ public class MainScreen extends ScreenAdapter {
 
         float deltaEating = System.currentTimeMillis() - lastTimeOfEating;
 
-        score += Math.floor(10.0f * ((5f - (deltaEating / 1000)) / 5f));
+        score += 10 + Math.floor(10.0f * Math.max(0, (5f - (deltaEating / 1000)) / 5f));
     }
 
     private void addBodyPart() {
