@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -32,6 +31,7 @@ public class MainScreen extends ScreenAdapter {
     private static final float MINIMUM_WALK_TIME = 0.076f;
     private static final float WORLD_WIDTH = 640.0f;
     private static final float WORLD_HEIGHT = 480.0f;
+    private static final float INITIAL_WALK_TIME = 0.4f;
     private Batch batch;
     private ShapeRenderer shapeRenderer;
     private long gameOverTimer;
@@ -61,6 +61,7 @@ public class MainScreen extends ScreenAdapter {
 
     private OrthographicCamera camera;
     private Viewport viewport;
+    private long lastTimeOfEating;
 
     @Override
     public void show() {
@@ -131,9 +132,10 @@ public class MainScreen extends ScreenAdapter {
         restart = false;
         score = 0;
         time = 0;
+        lastTimeOfEating = System.currentTimeMillis();
         executedGameOver = false;
         spentTime = 0.0f;
-        walkTime = 0.4f;
+        walkTime = INITIAL_WALK_TIME;
 
         float midX = (int) Math.floor(numCellsX / 2) * CELL_WIDTH;
         float midY = (int) Math.floor(numCellsY / 2) * CELL_HEIGHT;
@@ -350,13 +352,22 @@ public class MainScreen extends ScreenAdapter {
             addBodyPart();
             addFood();
 
-            score += 10;
+            computeScoreFromEatingFood();
+
+            lastTimeOfEating = System.currentTimeMillis();
             walkTime -= 0.01f;
 
             if (walkTime < MINIMUM_WALK_TIME) {
                 walkTime = MINIMUM_WALK_TIME;
             }
         }
+    }
+
+    private void computeScoreFromEatingFood() {
+
+        float deltaEating = System.currentTimeMillis() - lastTimeOfEating;
+
+        score += Math.floor(10.0f * (5f - deltaEating / 5f));
     }
 
     private void addBodyPart() {
