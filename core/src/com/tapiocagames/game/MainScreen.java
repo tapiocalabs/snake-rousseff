@@ -62,6 +62,7 @@ public class MainScreen extends ScreenAdapter {
     private OrthographicCamera camera;
     private Viewport viewport;
     private long lastTimeOfEating;
+    private boolean shapeDebug = false;
 
     @Override
     public void show() {
@@ -423,16 +424,19 @@ public class MainScreen extends ScreenAdapter {
         batch.setProjectionMatrix(camera.projection);
         batch.setTransformMatrix(camera.view);
 
-//        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-//        for (BodyPart part : snake.bodyParts) {
-//
-//            if (part.color != null) {
-//                shapeRenderer.setColor(part.color);
-//            }
-//
-//            shapeRenderer.rect(part.x, part.y, CELL_WIDTH, CELL_HEIGHT);
-//        }
-//        shapeRenderer.end();
+        if (shapeDebug) {
+
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            for (BodyPart part : snake.bodyParts) {
+
+                if (part.color != null) {
+                    shapeRenderer.setColor(part.color);
+                }
+
+                shapeRenderer.rect(part.x, part.y, CELL_WIDTH, CELL_HEIGHT);
+            }
+            shapeRenderer.end();
+        }
 
         batch.begin();
         for (Food food : foods) {
