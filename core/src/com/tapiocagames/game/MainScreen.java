@@ -38,7 +38,7 @@ public class MainScreen extends ScreenAdapter {
     private float walkTime;
     private float time;
     private float spentTime;
-    private BitmapFont font;
+    private BitmapFont gameOverFont;
     private BitmapFont scoreFont;
     private Sound gameOverSound;
     private Sound eatFoodSound;
@@ -90,9 +90,9 @@ public class MainScreen extends ScreenAdapter {
 //            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans-Bold.ttf"));
             FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("arcade-classic.ttf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            parameter.size = 36;
-            font = generator.generateFont(parameter);
-            font.setColor(Color.DARK_GRAY);
+            parameter.size = 56;
+            gameOverFont = generator.generateFont(parameter);
+            gameOverFont.setColor(Color.DARK_GRAY);
             generator.dispose(); // don't forget to dispose to avoid memory leaks!
         }
 
@@ -450,10 +450,10 @@ public class MainScreen extends ScreenAdapter {
             String s = "Game Over";
 
             glyphLayout.reset();
-            glyphLayout.setText(font, s);
+            glyphLayout.setText(gameOverFont, s);
 
             Gdx.app.log("render ", s + " at " + ((viewport.getWorldHeight() / 2) + (glyphLayout.height / 2)));
-            font.draw(batch, s, (viewport.getWorldWidth() / 2) - (glyphLayout.width / 2), (viewport.getWorldHeight() / 2) + (glyphLayout.height / 2));
+            gameOverFont.draw(batch, s, (viewport.getWorldWidth() / 2) - (glyphLayout.width / 2), (viewport.getWorldHeight() / 2) + (glyphLayout.height / 2));
         }
 
         drawScore();
@@ -519,7 +519,8 @@ public class MainScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
-        font.dispose();
+        gameOverFont.dispose();
+        scoreFont.dispose();
         batch.dispose();
         shapeRenderer.dispose();
     }
