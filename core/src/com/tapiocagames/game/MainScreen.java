@@ -422,8 +422,6 @@ public class MainScreen extends ScreenAdapter {
             x = (int) (MathUtils.floor(MathUtils.random() * (float) numCellsX) * CELL_WIDTH);
             y = (int) (MathUtils.floor(MathUtils.random() * (float) numCellsY) * CELL_HEIGHT);
 
-            // FIXME check also for apples and special foods
-
             for (int i = 0, leni = hitObjects.size(); i < leni && collision == false; i++) {
 
                 GameObject gameObject = hitObjects.get(i);
