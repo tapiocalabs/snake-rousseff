@@ -47,8 +47,10 @@ public class MainScreen extends ScreenAdapter {
     private Texture tbody;
     private Texture tfeet;
     private Snake snake;
+    private Food specialFood;
     private Stack<Food> foods;
     private Stack<Food> deadFoods;
+    private Texture specialFoodTexture;
     private Texture foodTexture1;
     private int score;
     private boolean restart;
@@ -98,6 +100,7 @@ public class MainScreen extends ScreenAdapter {
         }
 
         foodTexture1 = new Texture("food1.png");
+        specialFoodTexture = new Texture("special-food1.png");
 
         numCellsX = (int) MathUtils.floor(viewport.getWorldWidth() / CELL_WIDTH);
         numCellsY = (int) MathUtils.floor(viewport.getWorldHeight() / CELL_HEIGHT);
@@ -105,6 +108,7 @@ public class MainScreen extends ScreenAdapter {
         Gdx.app.log("MainScreen", String.format("WORLD_WIDTH %.2f and WORLD_HEIGHT %.2f", viewport.getWorldWidth(), viewport.getWorldHeight()));
         Gdx.app.log("MainScreen", String.format("ZOOM %.2f ", camera.zoom));
 
+        specialFood = new Food();
         foods = new Stack<>();
         deadFoods = new Stack<>();
         for (int i = 0; i < MAX_FOOD; i++) {
@@ -138,16 +142,19 @@ public class MainScreen extends ScreenAdapter {
         spentTime = 0.0f;
         walkTime = INITIAL_WALK_TIME;
 
-        float midX = (int) Math.floor(numCellsX / 2) * CELL_WIDTH;
-        float midY = (int) Math.floor(numCellsY / 2) * CELL_HEIGHT;
+        float midX = MathUtils.floor(numCellsX / 2) * CELL_WIDTH;
+        float midY = MathUtils.floor(numCellsY / 2) * CELL_HEIGHT;
 
         snake.setup(midX, midY, thead, tchest, tfeet);
+
+        specialFood.set(-100, -100, null);
 
         Gdx.app.log("show", String.format(" initial position (x,y) (%.2f,%.2f)", midX, midY));
         Gdx.app.log("show", String.format(" head position (x,y) (%.2f,%.2f)", snake.bodyParts.get(0).x, snake.bodyParts.get(0).y));
 
-        for (int i = 0; i < MAX_FOOD; i++)
+        for (int i = 0; i < MAX_FOOD; i++) {
             addFood();
+        }
     }
 
     @Override
@@ -380,13 +387,7 @@ public class MainScreen extends ScreenAdapter {
         newBodyPart.texture = tbody;
     }
 
-    private void addFood() {
-
-        if (foods.size() >= MAX_FOOD) {
-            return;
-        }
-
-        Food food = deadFoods.pop();
+    private float[] getEmptyCell() {
 
         float x = 0;
         float y = 0;
@@ -408,6 +409,34 @@ public class MainScreen extends ScreenAdapter {
                 }
             }
         } while (collision);
+
+        return new float[]{x, y};
+    }
+
+    private void addSpecialFood() {
+
+        float[] emptyCell = getEmptyCell();
+
+        float x = emptyCell[0];
+        float y = emptyCell[1];
+
+        specialFood.set(x, y, specialFoodTexture);
+
+        Gdx.app.log("addSpecialFood", String.format("x=%.2f, y=%.2f", x, y));
+    }
+
+    private void addFood() {
+
+        if (foods.size() >= MAX_FOOD) {
+            return;
+        }
+
+        Food food = deadFoods.pop();
+
+        float[] emptyCell = getEmptyCell();
+
+        float x = emptyCell[0];
+        float y = emptyCell[1];
 
         food.set(x, y, foodTexture1);
 
