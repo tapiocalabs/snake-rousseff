@@ -6,10 +6,8 @@ import com.badlogic.gdx.graphics.Texture;
 /**
  * Created by thiago on 03/02/16.
  */
-public class BodyPart {
+public class BodyPart extends GameObject {
 
-    float x;
-    float y;
     Texture texture;
     int direction;
 
@@ -22,6 +20,6 @@ public class BodyPart {
 
     @Override
     public String toString() {
-        return String.format("x=%d,y=%d", x, y);
+        return String.format("BodyPart x=%d,y=%d", x, y);
     }
 }

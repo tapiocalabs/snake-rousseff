@@ -1,5 +1,6 @@
 package com.tapiocagames.game;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
@@ -18,6 +19,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -48,6 +51,7 @@ public class MainScreen extends ScreenAdapter {
     private Texture tfeet;
     private Snake snake;
     private Food specialFood;
+    private List<GameObject> hitObjects;
     private Stack<Food> foods;
     private Stack<Food> deadFoods;
     private Texture specialFoodTexture;
@@ -108,11 +112,17 @@ public class MainScreen extends ScreenAdapter {
         Gdx.app.log("MainScreen", String.format("WORLD_WIDTH %.2f and WORLD_HEIGHT %.2f", viewport.getWorldWidth(), viewport.getWorldHeight()));
         Gdx.app.log("MainScreen", String.format("ZOOM %.2f ", camera.zoom));
 
+        hitObjects = new ArrayList<>();
+
         specialFood = new Food();
+        hitObjects.add(specialFood);
+
         foods = new Stack<>();
         deadFoods = new Stack<>();
         for (int i = 0; i < MAX_FOOD; i++) {
-            deadFoods.add(new Food());
+            Food food = new Food();
+            deadFoods.add(food);
+            hitObjects.add(food);
         }
 
         thead = new Texture("head.png");
@@ -124,6 +134,10 @@ public class MainScreen extends ScreenAdapter {
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
         snake = new Snake();
+
+        for (int i = 0; i < snake.bodyParts.size(); i++) {
+            hitObjects.add(snake.bodyParts.get(i));
+        }
 
         gameOverSound = Gdx.audio.newSound(Gdx.files.internal("game-over.ogg"));
         eatFoodSound = Gdx.audio.newSound(Gdx.files.internal("plin.ogg"));
@@ -181,6 +195,10 @@ public class MainScreen extends ScreenAdapter {
 
             move();
             checkCollisions();
+
+            if (specialFood.x < 0 && MathUtils.random() < 0.05f) {
+                addSpecialFood();
+            }
         }
 
         draw();
@@ -322,8 +340,13 @@ public class MainScreen extends ScreenAdapter {
         boolean collided = false;
         BodyPart head = snake.head();
 
-        l1:
-        for (int i = 0, leni = foods.size(); i < leni; i++) {
+        if (specialFood.x >= 0) {
+            if (specialFood.x == head.x && specialFood.y == head.y) {
+                collided = true;
+            }
+        }
+
+        for (int i = 0, leni = foods.size(); !collided && i < leni; i++) {
 
             Food food = foods.get(i);
 
@@ -333,7 +356,6 @@ public class MainScreen extends ScreenAdapter {
                 deadFoods.push(food);
                 leni--;
                 i--;
-                break l1;
             }
         }
 
@@ -400,11 +422,13 @@ public class MainScreen extends ScreenAdapter {
             x = (int) (MathUtils.floor(MathUtils.random() * (float) numCellsX) * CELL_WIDTH);
             y = (int) (MathUtils.floor(MathUtils.random() * (float) numCellsY) * CELL_HEIGHT);
 
-            for (int i = 0, leni = snake.bodyParts.size(); i < leni && collision == false; i++) {
+            // FIXME check also for apples and special foods
 
-                BodyPart bodyPart = snake.bodyParts.get(i);
+            for (int i = 0, leni = hitObjects.size(); i < leni && collision == false; i++) {
 
-                if (bodyPart.x == x && bodyPart.y == y) {
+                GameObject gameObject = hitObjects.get(i);
+
+                if (gameObject.x == x && gameObject.y == y) {
                     collision = true;
                 }
             }
@@ -421,6 +445,7 @@ public class MainScreen extends ScreenAdapter {
         float y = emptyCell[1];
 
         specialFood.set(x, y, specialFoodTexture);
+        hitObjects.add(specialFood);
 
         Gdx.app.log("addSpecialFood", String.format("x=%.2f, y=%.2f", x, y));
     }
@@ -439,10 +464,11 @@ public class MainScreen extends ScreenAdapter {
         float y = emptyCell[1];
 
         food.set(x, y, foodTexture1);
+        foods.add(food);
+
+        hitObjects.add(food);
 
         Gdx.app.log("addFood", String.format("x=%.2f, y=%.2f", x, y));
-
-        foods.add(food);
     }
 
     private void draw() {
