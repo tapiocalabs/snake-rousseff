@@ -407,6 +407,8 @@ public class MainScreen extends ScreenAdapter {
         newBodyPart = new BodyPart(feet.x, feet.y);
         newBodyPart.color = Color.RED;
         newBodyPart.texture = tbody;
+
+        hitObjects.add(newBodyPart);
     }
 
     private float[] getEmptyCell() {
