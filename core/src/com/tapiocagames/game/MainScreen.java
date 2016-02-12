@@ -196,7 +196,10 @@ public class MainScreen extends ScreenAdapter {
             move();
             checkCollisions();
 
-            if (specialFood.x < 0 && MathUtils.random() < 0.05f) {
+            float f = MathUtils.random();
+            Gdx.app.log("render", String.format("specialFood.x %.2f MathUtils.random(): %.2f", specialFood.x, f));
+
+            if (specialFood.x < 0 && f < 0.5f) {
                 addSpecialFood();
             }
         }
@@ -251,10 +254,6 @@ public class MainScreen extends ScreenAdapter {
         boolean lastBodyIsTheChest = lastBody.x == chest.x && lastBody.y == chest.y;
 
         boolean justAdded = newBodyPart != null;
-
-        BodyPart beforeLastBody = snake.bodyParts.get(snake.bodyParts.size() - 3); // may be the chest
-        float beforeLastBodyY = beforeLastBody.y;
-        float beforeLastBodyX = beforeLastBody.x;
 
         int lastHeadDirection = head.direction;
         float lastHeadY = head.y;
@@ -496,6 +495,10 @@ public class MainScreen extends ScreenAdapter {
         batch.begin();
         for (Food food : foods) {
             batch.draw(food.texture, food.x, food.y);
+        }
+
+        if (specialFood.x >= 0) {
+            batch.draw(specialFood.texture, specialFood.x, specialFood.y);
         }
 
         for (int i = 1; i < snake.bodyParts.size(); i++) {
