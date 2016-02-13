@@ -342,6 +342,7 @@ public class MainScreen extends ScreenAdapter {
         if (specialFood.x >= 0) {
             if (specialFood.x == head.x && specialFood.y == head.y) {
                 collided = true;
+                specialFood.x = -100;
             }
         }
 
