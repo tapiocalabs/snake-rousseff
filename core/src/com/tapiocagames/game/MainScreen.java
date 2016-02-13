@@ -35,6 +35,7 @@ public class MainScreen extends ScreenAdapter {
     private static final float WORLD_WIDTH = 640.0f;
     private static final float WORLD_HEIGHT = 480.0f;
     private static final float INITIAL_WALK_TIME = 0.4f;
+    private final Game game;
     private Batch batch;
     private ShapeRenderer shapeRenderer;
     private long gameOverTimer;
@@ -64,12 +65,15 @@ public class MainScreen extends ScreenAdapter {
     private boolean gameIsOver;
     private boolean executedGameOver;
     private GlyphLayout glyphLayout;
-
     private OrthographicCamera camera;
     private Viewport viewport;
     private long lastTimeOfEating;
     private boolean shapeDebug = false;
     private boolean changedDirection = false;
+
+    public MainScreen(Game game) {
+        this.game = game;
+    }
 
     @Override
     public void show() {
