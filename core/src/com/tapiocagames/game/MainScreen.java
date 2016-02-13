@@ -69,6 +69,7 @@ public class MainScreen extends ScreenAdapter {
     private Viewport viewport;
     private long lastTimeOfEating;
     private boolean shapeDebug = false;
+    private boolean changedDirection = false;
 
     @Override
     public void show() {
@@ -202,6 +203,8 @@ public class MainScreen extends ScreenAdapter {
             if (specialFood.x < 0 && f < 0.5f) {
                 addSpecialFood();
             }
+
+            changedDirection = false;
         }
 
         draw();
@@ -229,15 +232,23 @@ public class MainScreen extends ScreenAdapter {
 
         BodyPart head = snake.head();
 
-        if (left && (head.direction == Snake.UP || head.direction == Snake.DOWN)) {
-            head.direction = Snake.LEFT;
-        } else if (right && (head.direction == Snake.UP || head.direction == Snake.DOWN)) {
-            head.direction = Snake.RIGHT;
-        } else if (up && (head.direction == Snake.LEFT || head.direction == Snake.RIGHT)) {
-            head.direction = Snake.UP;
-        } else if (down && (head.direction == Snake.LEFT || head.direction == Snake.RIGHT)) {
-            head.direction = Snake.DOWN;
-        } else if (enter) {
+        if (!changedDirection) {
+            if (left && (head.direction == Snake.UP || head.direction == Snake.DOWN)) {
+                head.direction = Snake.LEFT;
+                changedDirection = true;
+            } else if (right && (head.direction == Snake.UP || head.direction == Snake.DOWN)) {
+                head.direction = Snake.RIGHT;
+                changedDirection = true;
+            } else if (up && (head.direction == Snake.LEFT || head.direction == Snake.RIGHT)) {
+                head.direction = Snake.UP;
+                changedDirection = true;
+            } else if (down && (head.direction == Snake.LEFT || head.direction == Snake.RIGHT)) {
+                head.direction = Snake.DOWN;
+                changedDirection = true;
+            }
+        }
+
+        if (enter) {
             if (gameIsOver) {
                 restart = true;
             }
