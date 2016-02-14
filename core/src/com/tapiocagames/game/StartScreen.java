@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /**
@@ -44,6 +45,8 @@ public class StartScreen extends ScreenAdapter {
 
         ImageButton playButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(playUpTexture)),
                 new TextureRegionDrawable(new TextureRegion(playDownTexture)));
+
+        playButton.setPosition(WORLD_WIDTH / 2, WORLD_HEIGHT / 4.0f, Align.center);
 
         playButton.addListener(new ActorGestureListener() {
             @Override
