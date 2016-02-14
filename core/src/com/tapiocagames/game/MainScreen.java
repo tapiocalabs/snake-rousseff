@@ -70,6 +70,7 @@ public class MainScreen extends ScreenAdapter {
     private long lastTimeOfEating;
     private boolean shapeDebug = false;
     private boolean changedDirection = false;
+    private float ateSpecialFood;
 
     public MainScreen(Game game) {
         this.game = game;
@@ -153,6 +154,7 @@ public class MainScreen extends ScreenAdapter {
     private void restartGame() {
 
         gameIsOver = false;
+        ateSpecialFood = 0.0f;
         restart = false;
         score = 0;
         time = 0;
@@ -183,6 +185,10 @@ public class MainScreen extends ScreenAdapter {
         spentTime += delta;
         time += delta;
 
+        if (ateSpecialFood > 0) {
+            ateSpecialFood -= delta;
+        }
+
         queryInput();
 
         if (gameIsOver) {
@@ -197,7 +203,6 @@ public class MainScreen extends ScreenAdapter {
 
         if (spentTime >= walkTime) {
             spentTime -= walkTime;
-
             move();
             checkCollisions();
 
@@ -358,34 +363,36 @@ public class MainScreen extends ScreenAdapter {
             if (specialFood.x == head.x && specialFood.y == head.y) {
                 collided = true;
                 specialFood.x = -100;
+                ateSpecialFood = 5.0f;
             }
         }
 
-        for (int i = 0, leni = foods.size(); !collided && i < leni; i++) {
+        if (!collided) {
+            for (int i = 0, leni = foods.size(); !collided && i < leni; i++) {
 
-            Food food = foods.get(i);
+                Food food = foods.get(i);
 
-            if (food.x == head.x && food.y == head.y) {
-                collided = true;
-                foods.remove(i);
-                deadFoods.push(food);
-                leni--;
-                i--;
+                if (food.x == head.x && food.y == head.y) {
+                    collided = true;
+                    foods.remove(i);
+                    deadFoods.push(food);
+                    leni--;
+                    i--;
+                }
             }
         }
 
-        if (collided) {
-            eatFoodSound.play();
-        }
+        if (!collided && ateSpecialFood <= 0) {
 
-        l1:
-        for (int i = 1, leni = snake.bodyParts.size(); i < leni; i++) {
+            l1:
+            for (int i = 1, leni = snake.bodyParts.size(); i < leni; i++) {
 
-            BodyPart bodyPart = snake.bodyParts.get(i);
+                BodyPart bodyPart = snake.bodyParts.get(i);
 
-            if (bodyPart.x == head.x && bodyPart.y == head.y) {
-                gameIsOver = true;
-                break l1;
+                if (bodyPart.x == head.x && bodyPart.y == head.y) {
+                    gameIsOver = true;
+                    break l1;
+                }
             }
         }
 
@@ -394,6 +401,9 @@ public class MainScreen extends ScreenAdapter {
         }
 
         if (collided) {
+
+            eatFoodSound.play();
+
             addBodyPart();
             addFood();
 
