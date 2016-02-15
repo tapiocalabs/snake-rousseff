@@ -70,7 +70,7 @@ public class MainScreen extends ScreenAdapter {
     private long lastTimeOfEating;
     private boolean shapeDebug = false;
     private boolean changedDirection = false;
-    private float ateSpecialFood;
+    private SpecialHandler specialHandler;
 
     public MainScreen(Game game) {
         this.game = game;
@@ -109,6 +109,7 @@ public class MainScreen extends ScreenAdapter {
             generator.dispose(); // don't forget to dispose to avoid memory leaks!
         }
 
+        specialHandler = new SpecialHandler(viewport);
         foodTexture1 = new Texture("food1.png");
         specialFoodTexture = new Texture("special-food1.png");
 
@@ -154,7 +155,7 @@ public class MainScreen extends ScreenAdapter {
     private void restartGame() {
 
         gameIsOver = false;
-        ateSpecialFood = 0.0f;
+        specialHandler.stop();
         restart = false;
         score = 0;
         time = 0;
@@ -185,10 +186,6 @@ public class MainScreen extends ScreenAdapter {
         spentTime += delta;
         time += delta;
 
-        if (ateSpecialFood > 0) {
-            ateSpecialFood -= delta;
-        }
-
         queryInput();
 
         if (gameIsOver) {
@@ -214,6 +211,10 @@ public class MainScreen extends ScreenAdapter {
             }
 
             changedDirection = false;
+
+            if (specialHandler.isRunning()) {
+                specialHandler.update(delta);
+            }
         }
 
         draw();
@@ -363,7 +364,7 @@ public class MainScreen extends ScreenAdapter {
             if (specialFood.x == head.x && specialFood.y == head.y) {
                 collided = true;
                 specialFood.x = -100;
-                ateSpecialFood = 5.0f;
+                specialHandler.start(5.0f);
             }
         }
 
@@ -382,7 +383,7 @@ public class MainScreen extends ScreenAdapter {
             }
         }
 
-        if (!collided && ateSpecialFood <= 0) {
+        if (!collided && !specialHandler.isRunning()) {
 
             l1:
             for (int i = 1, leni = snake.bodyParts.size(); i < leni; i++) {
@@ -546,6 +547,10 @@ public class MainScreen extends ScreenAdapter {
 
         drawScore();
         drawTime();
+        
+        if (specialHandler.isRunning()) {
+            specialHandler.render(batch);
+        }
 
         batch.end();
     }
