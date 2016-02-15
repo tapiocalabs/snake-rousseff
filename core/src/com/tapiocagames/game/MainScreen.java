@@ -211,10 +211,10 @@ public class MainScreen extends ScreenAdapter {
             }
 
             changedDirection = false;
+        }
 
-            if (specialHandler.isRunning()) {
-                specialHandler.update(delta);
-            }
+        if (specialHandler.isRunning()) {
+            specialHandler.update(delta);
         }
 
         draw();
@@ -547,7 +547,7 @@ public class MainScreen extends ScreenAdapter {
 
         drawScore();
         drawTime();
-        
+
         if (specialHandler.isRunning()) {
             specialHandler.render(batch);
         }
