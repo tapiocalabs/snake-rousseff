@@ -35,11 +35,13 @@ public class MainScreen extends ScreenAdapter {
     private static final float WORLD_WIDTH = 640.0f;
     private static final float WORLD_HEIGHT = 480.0f;
     private static final float INITIAL_WALK_TIME = 0.4f;
+    private static final float SPECIAL_TIME_HOP = 1.0f;
     private final Game game;
     private Batch batch;
     private ShapeRenderer shapeRenderer;
     private long gameOverTimer;
     private float walkTime;
+    private float specialTime;
     private float time;
     private float spentTime;
     private BitmapFont gameOverFont;
@@ -161,6 +163,7 @@ public class MainScreen extends ScreenAdapter {
         time = 0;
         lastTimeOfEating = System.currentTimeMillis();
         executedGameOver = false;
+        specialTime = 0.0f;
         spentTime = 0.0f;
         walkTime = INITIAL_WALK_TIME;
 
@@ -203,14 +206,20 @@ public class MainScreen extends ScreenAdapter {
             move();
             checkCollisions();
 
+            changedDirection = false;
+        }
+
+        specialTime += delta;
+
+        if (specialTime > SPECIAL_TIME_HOP) {
+            specialTime -= SPECIAL_TIME_HOP;
+
             float f = MathUtils.random();
             Gdx.app.log("render", String.format("specialFood.x %.2f MathUtils.random(): %.2f", specialFood.x, f));
 
-            if (specialFood.x < 0 && f < 0.5f) {
+            if (specialFood.x < 0 && f < 0.01f) {
                 addSpecialFood();
             }
-
-            changedDirection = false;
         }
 
         if (specialHandler.isRunning()) {
