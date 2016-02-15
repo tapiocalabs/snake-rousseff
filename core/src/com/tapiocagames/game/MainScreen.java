@@ -58,6 +58,7 @@ public class MainScreen extends ScreenAdapter {
     private Stack<Food> foods;
     private Stack<Food> deadFoods;
     private Texture specialFoodTexture;
+    private Texture bgTexture;
     private Texture foodTexture1;
     private int score;
     private boolean restart;
@@ -112,6 +113,7 @@ public class MainScreen extends ScreenAdapter {
         }
 
         specialHandler = new SpecialHandler(viewport);
+        bgTexture = new Texture("bg-grass-and-holes.png");
         foodTexture1 = new Texture("food1.png");
         specialFoodTexture = new Texture("special-food1.png");
 
@@ -529,6 +531,9 @@ public class MainScreen extends ScreenAdapter {
         }
 
         batch.begin();
+
+        batch.draw(bgTexture, 0, 0);
+
         for (Food food : foods) {
             batch.draw(food.texture, food.x, food.y);
         }
@@ -621,6 +626,11 @@ public class MainScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
+
+        bgTexture.dispose();
+        foodTexture1.dispose();
+        specialFoodTexture.dispose();
+
         gameOverFont.dispose();
         scoreFont.dispose();
         batch.dispose();
