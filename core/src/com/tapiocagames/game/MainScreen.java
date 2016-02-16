@@ -40,10 +40,10 @@ public class MainScreen extends ScreenAdapter {
     private Batch batch;
     private ShapeRenderer shapeRenderer;
     private long gameOverTimer;
-    private float walkTime;
+    private float timeNeededToMove;
     private float specialTime;
     private float time;
-    private float spentTime;
+    private float timeSpentUntilNextMove;
     private BitmapFont gameOverFont;
     private BitmapFont scoreFont;
     private Sound gameOverSound;
@@ -166,8 +166,8 @@ public class MainScreen extends ScreenAdapter {
         lastTimeOfEating = System.currentTimeMillis();
         executedGameOver = false;
         specialTime = 0.0f;
-        spentTime = 0.0f;
-        walkTime = INITIAL_WALK_TIME;
+        timeSpentUntilNextMove = 0.0f;
+        timeNeededToMove = INITIAL_WALK_TIME;
 
         float midX = MathUtils.floor(numCellsX / 2) * CELL_WIDTH;
         float midY = MathUtils.floor(numCellsY / 2) * CELL_HEIGHT;
@@ -188,7 +188,7 @@ public class MainScreen extends ScreenAdapter {
     public void render(float delta) {
         super.render(delta);
 
-        spentTime += delta;
+        timeSpentUntilNextMove += delta;
         time += delta;
 
         queryInput();
@@ -203,8 +203,9 @@ public class MainScreen extends ScreenAdapter {
             return;
         }
 
-        if (spentTime >= walkTime) {
-            spentTime -= walkTime;
+        if (timeSpentUntilNextMove >= timeNeededToMove) {
+            timeSpentUntilNextMove -= timeNeededToMove;
+
             move();
             checkCollisions();
 
@@ -329,7 +330,7 @@ public class MainScreen extends ScreenAdapter {
             }
         }
 
-        Gdx.app.log("move", String.format("velocity %.2f direction %d. x=%.2f y=%.2f", walkTime, head.direction, head.x, head.y));
+        Gdx.app.log("move", String.format("velocity %.3f direction %d. x=%.2f y=%.2f", timeNeededToMove, head.direction, head.x, head.y));
 
         chest.x = lastHeadX;
         chest.y = lastHeadY;
@@ -368,24 +369,27 @@ public class MainScreen extends ScreenAdapter {
 
     private void checkCollisions() {
 
-        boolean collided = false;
+        boolean collidedToFood = false;
+        boolean collidedToSpecial = false;
         BodyPart head = snake.head();
 
         if (specialFood.x >= 0) {
             if (specialFood.x == head.x && specialFood.y == head.y) {
-                collided = true;
-                specialFood.x = -100;
-                specialHandler.start();
+                collidedToSpecial = true;
             }
         }
 
-        if (!collided) {
-            for (int i = 0, leni = foods.size(); !collided && i < leni; i++) {
+        if (collidedToSpecial) {
+
+            collidedToSpecial();
+        } else {
+
+            for (int i = 0, leni = foods.size(); !collidedToFood && i < leni; i++) {
 
                 Food food = foods.get(i);
 
                 if (food.x == head.x && food.y == head.y) {
-                    collided = true;
+                    collidedToFood = true;
                     foods.remove(i);
                     deadFoods.push(food);
                     leni--;
@@ -394,40 +398,53 @@ public class MainScreen extends ScreenAdapter {
             }
         }
 
-        if (!collided && !specialHandler.isRunning()) {
+        if (!collidedToFood) {
 
-            l1:
-            for (int i = 1, leni = snake.bodyParts.size(); i < leni; i++) {
+            if (!specialHandler.isRunning()) {
 
-                BodyPart bodyPart = snake.bodyParts.get(i);
+                l1:
+                for (int i = 1, leni = snake.bodyParts.size(); i < leni; i++) {
 
-                if (bodyPart.x == head.x && bodyPart.y == head.y) {
-                    gameIsOver = true;
-                    break l1;
+                    BodyPart bodyPart = snake.bodyParts.get(i);
+
+                    if (bodyPart.x == head.x && bodyPart.y == head.y) {
+                        gameIsOver = true;
+                        break l1;
+                    }
                 }
             }
         }
 
         if (gameIsOver) {
-            return;
-        }
 
-        if (collided) {
+        } else if (collidedToFood) {
 
             eatFoodSound.play();
-
             addBodyPart();
             addFood();
 
             computeScoreFromEatingFood();
 
             lastTimeOfEating = System.currentTimeMillis();
-            walkTime -= 0.01f;
 
-            if (walkTime < MINIMUM_WALK_TIME) {
-                walkTime = MINIMUM_WALK_TIME;
+            if (timeNeededToMove < 0.20f) {
+                timeNeededToMove -= 0.005f;
+            } else {
+                timeNeededToMove -= 0.01f;
+            }
+
+            if (timeNeededToMove < MINIMUM_WALK_TIME) {
+                timeNeededToMove = MINIMUM_WALK_TIME;
             }
         }
+    }
+
+    private void collidedToSpecial() {
+
+        eatFoodSound.play();
+
+        specialFood.x = -100;
+        specialHandler.start();
     }
 
     private void computeScoreFromEatingFood() {
