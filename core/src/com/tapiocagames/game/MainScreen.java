@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -74,6 +75,7 @@ public class MainScreen extends ScreenAdapter {
     private boolean shapeDebug = false;
     private boolean changedDirection = false;
     private SpecialHandler specialHandler;
+    private Music bgAudio;
 
     public MainScreen(Game game) {
         this.game = game;
@@ -85,6 +87,10 @@ public class MainScreen extends ScreenAdapter {
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
         camera.update();
+
+        bgAudio = Gdx.audio.newMusic(Gdx.files.internal("mandioca-loop.ogg"));
+        bgAudio.setLooping(true);
+        bgAudio.setVolume(0.1f);
 
 //        camera.zoom = 1.1f;
 //        camera.update();
@@ -158,6 +164,7 @@ public class MainScreen extends ScreenAdapter {
 
     private void restartGame() {
 
+        bgAudio.play();
         gameIsOver = false;
         specialHandler.stop();
         restart = false;
@@ -237,6 +244,8 @@ public class MainScreen extends ScreenAdapter {
         if (executedGameOver) {
             return;
         }
+
+        bgAudio.stop();
 
         gameOverTimer = System.currentTimeMillis();
         gameOverSound.play();
@@ -628,22 +637,23 @@ public class MainScreen extends ScreenAdapter {
 
     @Override
     public void pause() {
-
+        bgAudio.pause();
     }
 
     @Override
     public void resume() {
-
+        bgAudio.play();
     }
 
     @Override
     public void hide() {
-
+        bgAudio.pause();
     }
 
     @Override
     public void dispose() {
 
+        bgAudio.dispose();
         bgTexture.dispose();
         foodTexture1.dispose();
         specialFoodTexture.dispose();

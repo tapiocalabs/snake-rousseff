@@ -1,8 +1,11 @@
 package com.tapiocagames.game;
 
+import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -25,6 +28,7 @@ public class StartScreen extends ScreenAdapter {
     private final Game game;
 
     private Stage stage;
+    private Music bgAudio;
     private Texture bgTexture;
     private Texture logoTexture;
     private Texture playUpTexture;
@@ -39,6 +43,10 @@ public class StartScreen extends ScreenAdapter {
 
         stage = new Stage(new FitViewport(WORLD_WIDTH, WORLD_HEIGHT));
         Gdx.input.setInputProcessor(stage);
+
+        bgAudio = Gdx.audio.newMusic(Gdx.files.internal("mandioca-loop.ogg"));
+        bgAudio.setLooping(true);
+        bgAudio.setVolume(0.4f);
 
         bgTexture = new Texture(Gdx.files.internal("bg.png"));
         logoTexture = new Texture(Gdx.files.internal("start-screen-logo.png"));
@@ -75,12 +83,14 @@ public class StartScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
+        bgAudio.play();
         stage.act(delta);
         stage.draw();
     }
 
     @Override
     public void dispose() {
+        bgAudio.dispose();
         playDownTexture.dispose();
         playUpTexture.dispose();
         bgTexture.dispose();
