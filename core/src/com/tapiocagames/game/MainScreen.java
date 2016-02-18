@@ -67,6 +67,8 @@ public class MainScreen extends ScreenAdapter {
     private int numCellsY;
     private BodyPart newBodyPart;
     private boolean gameIsOver;
+    private boolean gameIsPaused;
+    private boolean pauseChanged;
     private boolean executedGameOver;
     private GlyphLayout glyphLayout;
     private OrthographicCamera camera;
@@ -165,6 +167,7 @@ public class MainScreen extends ScreenAdapter {
     private void restartGame() {
 
         bgAudio.play();
+        gameIsPaused = false;
         gameIsOver = false;
         specialHandler.stop();
         restart = false;
@@ -172,6 +175,7 @@ public class MainScreen extends ScreenAdapter {
         time = 0;
         lastTimeOfEating = System.currentTimeMillis();
         executedGameOver = false;
+        pauseChanged = false;
         specialTime = 0.0f;
         timeSpentUntilNextMove = 0.0f;
         timeNeededToMove = INITIAL_WALK_TIME;
@@ -195,9 +199,6 @@ public class MainScreen extends ScreenAdapter {
     public void render(float delta) {
         super.render(delta);
 
-        timeSpentUntilNextMove += delta;
-        time += delta;
-
         queryInput();
 
         if (gameIsOver) {
@@ -209,6 +210,24 @@ public class MainScreen extends ScreenAdapter {
 
             return;
         }
+
+        if (pauseChanged) {
+
+            if (gameIsPaused) {
+                pause();
+            } else {
+                resume();
+            }
+
+            pauseChanged = false;
+        }
+
+        if (gameIsPaused) {
+            return;
+        }
+
+        timeSpentUntilNextMove += delta;
+        time += delta;
 
         if (timeSpentUntilNextMove >= timeNeededToMove) {
             timeSpentUntilNextMove -= timeNeededToMove;
@@ -255,11 +274,20 @@ public class MainScreen extends ScreenAdapter {
 
     private void queryInput() {
 
+        boolean spaceBar = Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
         boolean left = Gdx.input.isKeyPressed(Input.Keys.LEFT);
         boolean right = Gdx.input.isKeyPressed(Input.Keys.RIGHT);
         boolean up = Gdx.input.isKeyPressed(Input.Keys.UP);
         boolean down = Gdx.input.isKeyPressed(Input.Keys.DOWN);
         boolean enter = Gdx.input.isKeyPressed(Input.Keys.ENTER);
+
+        if (spaceBar) {
+            if (!pauseChanged) {
+                gameIsPaused = !gameIsPaused;
+                pauseChanged = true;
+                return;
+            }
+        }
 
         BodyPart head = snake.head();
 
@@ -637,16 +665,19 @@ public class MainScreen extends ScreenAdapter {
 
     @Override
     public void pause() {
+
         bgAudio.pause();
     }
 
     @Override
     public void resume() {
+
         bgAudio.play();
     }
 
     @Override
     public void hide() {
+
         bgAudio.pause();
     }
 
