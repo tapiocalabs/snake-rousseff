@@ -92,7 +92,7 @@ public class MainScreen extends ScreenAdapter {
 
         bgAudio = Gdx.audio.newMusic(Gdx.files.internal("mandioca-loop.ogg"));
         bgAudio.setLooping(true);
-        bgAudio.setVolume(0.1f);
+        bgAudio.setVolume(0.08f);
 
 //        camera.zoom = 1.1f;
 //        camera.update();
@@ -101,7 +101,6 @@ public class MainScreen extends ScreenAdapter {
         viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
 
         {
-            //            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("UbuntuMono-B.ttf"));
             FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("arcade-classic.ttf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
             parameter.size = 28;
@@ -111,7 +110,6 @@ public class MainScreen extends ScreenAdapter {
         }
 
         {
-//            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("OpenSans-Bold.ttf"));
             FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("arcade-classic.ttf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
             parameter.size = 56;
@@ -171,6 +169,7 @@ public class MainScreen extends ScreenAdapter {
         gameIsOver = false;
         specialHandler.stop();
         restart = false;
+        gameOverTimer = 0;
         score = 0;
         time = 0;
         lastTimeOfEating = System.currentTimeMillis();

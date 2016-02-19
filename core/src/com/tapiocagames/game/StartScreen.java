@@ -46,7 +46,7 @@ public class StartScreen extends ScreenAdapter {
 
         bgAudio = Gdx.audio.newMusic(Gdx.files.internal("mandioca-loop.ogg"));
         bgAudio.setLooping(true);
-        bgAudio.setVolume(0.4f);
+        bgAudio.setVolume(0.3f);
 
         bgTexture = new Texture(Gdx.files.internal("bg.png"));
         logoTexture = new Texture(Gdx.files.internal("start-screen-logo.png"));
