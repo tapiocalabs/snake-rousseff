@@ -189,6 +189,14 @@ public class MainScreen extends ScreenAdapter {
         Gdx.app.log("show", String.format(" initial position (x,y) (%.2f,%.2f)", midX, midY));
         Gdx.app.log("show", String.format(" head position (x,y) (%.2f,%.2f)", snake.bodyParts.get(0).x, snake.bodyParts.get(0).y));
 
+        for (int i = 0, leni = foods.size(); i < leni; i++) {
+
+            Food food = foods.get(i);
+
+            foods.remove(food);
+            deadFoods.push(food);
+        }
+
         for (int i = 0; i < MAX_FOOD; i++) {
             addFood();
         }
