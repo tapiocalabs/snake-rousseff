@@ -189,12 +189,9 @@ public class MainScreen extends ScreenAdapter {
         Gdx.app.log("show", String.format(" initial position (x,y) (%.2f,%.2f)", midX, midY));
         Gdx.app.log("show", String.format(" head position (x,y) (%.2f,%.2f)", snake.bodyParts.get(0).x, snake.bodyParts.get(0).y));
 
-        for (int i = 0, leni = foods.size(); i < leni; i++) {
-
-            Food food = foods.get(i);
-
-            foods.remove(food);
-            deadFoods.push(food);
+        for (int i = 0, leni = foods.size(); i < leni; ) {
+            deadFoods.push(foods.remove(i));
+            leni--;
         }
 
         for (int i = 0; i < MAX_FOOD; i++) {
@@ -253,7 +250,7 @@ public class MainScreen extends ScreenAdapter {
             float f = MathUtils.random();
             Gdx.app.log("render", String.format("specialFood.x %.2f MathUtils.random(): %.2f", specialFood.x, f));
 
-            if (specialFood.x < 0 && f < 0.01f) {
+            if (specialFood.x < 0 && f < 0.03f) {
                 addSpecialFood();
             }
         }
