@@ -189,9 +189,8 @@ public class MainScreen extends ScreenAdapter {
         Gdx.app.log("show", String.format(" initial position (x,y) (%.2f,%.2f)", midX, midY));
         Gdx.app.log("show", String.format(" head position (x,y) (%.2f,%.2f)", snake.bodyParts.get(0).x, snake.bodyParts.get(0).y));
 
-        for (int i = 0, leni = foods.size(); i < leni; ) {
+        for (int i = 0, leni = foods.size(); i < leni; leni--) {
             deadFoods.push(foods.remove(i));
-            leni--;
         }
 
         for (int i = 0; i < MAX_FOOD; i++) {
@@ -242,18 +241,7 @@ public class MainScreen extends ScreenAdapter {
             changedDirection = false;
         }
 
-        specialTime += delta;
-
-        if (specialTime > SPECIAL_TIME_HOP) {
-            specialTime -= SPECIAL_TIME_HOP;
-
-            float f = MathUtils.random();
-            Gdx.app.log("render", String.format("specialFood.x %.2f MathUtils.random(): %.2f", specialFood.x, f));
-
-            if (specialFood.x < 0 && f < 0.03f) {
-                addSpecialFood();
-            }
-        }
+        addSpecialFood(delta);
 
         if (specialHandler.isRunning()) {
             specialHandler.update(delta);
@@ -532,7 +520,22 @@ public class MainScreen extends ScreenAdapter {
         return new float[]{x, y};
     }
 
-    private void addSpecialFood() {
+    private void addSpecialFood(float delta) {
+        specialTime += delta;
+
+        if (specialTime > SPECIAL_TIME_HOP) {
+            specialTime -= SPECIAL_TIME_HOP;
+
+            float f = MathUtils.random();
+            Gdx.app.log("render", String.format("specialFood.x %.2f MathUtils.random(): %.2f", specialFood.x, f));
+
+            if (specialFood.x < 0 && f < 0.03f) {
+                addSpecialFood0();
+            }
+        }
+    }
+
+    private void addSpecialFood0() {
 
         float[] emptyCell = getEmptyCell();
 
