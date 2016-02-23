@@ -66,8 +66,6 @@ public class MainScreen extends ScreenAdapter {
     private int numCellsX;
     private int numCellsY;
     private BodyPart newBodyPart;
-    private boolean gameIsOver;
-    private boolean gameIsPaused;
     private boolean pauseChanged;
     private boolean executedGameOver;
     private GlyphLayout glyphLayout;
@@ -78,6 +76,7 @@ public class MainScreen extends ScreenAdapter {
     private boolean changedDirection = false;
     private SpecialHandler specialHandler;
     private Music bgAudio;
+    private STATE state = STATE.PLAYING;
 
     public MainScreen(Game game) {
         this.game = game;
@@ -164,9 +163,8 @@ public class MainScreen extends ScreenAdapter {
 
     private void restartGame() {
 
+        state = STATE.PLAYING;
         bgAudio.play();
-        gameIsPaused = false;
-        gameIsOver = false;
         specialHandler.stop();
         restart = false;
         gameOverTimer = 0;
@@ -204,49 +202,58 @@ public class MainScreen extends ScreenAdapter {
 
         queryInput();
 
-        if (gameIsOver) {
+        if (state == STATE.GAME_OVER) {
+
             gameOver();
+
+            boolean enter = Gdx.input.isKeyJustPressed(Input.Keys.ENTER);
+
+            if (enter) {
+                restart = true;
+            }
 
             if (restart && System.currentTimeMillis() - gameOverTimer > 7000) {
                 restartGame();
             }
+        } else if (state == STATE.PAUSED) {
 
-            return;
-        }
+            boolean space = Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
 
-        if (pauseChanged) {
+            if (space) {
+                resume();
+                state = STATE.PLAYING;
+            }
+        } else if (state == STATE.PLAYING) {
 
-            if (gameIsPaused) {
+            boolean space = Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
+
+            if (space) {
+
+                state = STATE.PAUSED;
                 pause();
             } else {
-                resume();
+
+                timeSpentUntilNextMove += delta;
+                time += delta;
+
+                if (timeSpentUntilNextMove >= timeNeededToMove) {
+                    timeSpentUntilNextMove -= timeNeededToMove;
+
+                    move();
+                    checkCollisions();
+
+                    changedDirection = false;
+                }
+
+                addSpecialFood(delta);
+
+                if (specialHandler.isRunning()) {
+                    specialHandler.update(delta);
+                }
             }
-
-            pauseChanged = false;
         }
 
-        if (gameIsPaused) {
-            return;
-        }
-
-        timeSpentUntilNextMove += delta;
-        time += delta;
-
-        if (timeSpentUntilNextMove >= timeNeededToMove) {
-            timeSpentUntilNextMove -= timeNeededToMove;
-
-            move();
-            checkCollisions();
-
-            changedDirection = false;
-        }
-
-        addSpecialFood(delta);
-
-        if (specialHandler.isRunning()) {
-            specialHandler.update(delta);
-        }
-
+        clearScreen();
         draw();
     }
 
@@ -266,20 +273,11 @@ public class MainScreen extends ScreenAdapter {
 
     private void queryInput() {
 
-        boolean spaceBar = Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
         boolean left = Gdx.input.isKeyPressed(Input.Keys.LEFT);
         boolean right = Gdx.input.isKeyPressed(Input.Keys.RIGHT);
         boolean up = Gdx.input.isKeyPressed(Input.Keys.UP);
         boolean down = Gdx.input.isKeyPressed(Input.Keys.DOWN);
         boolean enter = Gdx.input.isKeyPressed(Input.Keys.ENTER);
-
-        if (spaceBar) {
-            if (!pauseChanged) {
-                gameIsPaused = !gameIsPaused;
-                pauseChanged = true;
-                return;
-            }
-        }
 
         BodyPart head = snake.head();
 
@@ -296,12 +294,6 @@ public class MainScreen extends ScreenAdapter {
             } else if (down && (head.direction == Snake.LEFT || head.direction == Snake.RIGHT)) {
                 head.direction = Snake.DOWN;
                 changedDirection = true;
-            }
-        }
-
-        if (enter) {
-            if (gameIsOver) {
-                restart = true;
             }
         }
     }
@@ -437,16 +429,14 @@ public class MainScreen extends ScreenAdapter {
                     BodyPart bodyPart = snake.bodyParts.get(i);
 
                     if (bodyPart.x == head.x && bodyPart.y == head.y) {
-                        gameIsOver = true;
+                        state = STATE.GAME_OVER;
                         break l1;
                     }
                 }
             }
         }
 
-        if (gameIsOver) {
-
-        } else if (collidedToFood) {
+        if (state == STATE.PLAYING && collidedToFood) {
 
             eatFoodSound.play();
             addBodyPart();
@@ -569,10 +559,12 @@ public class MainScreen extends ScreenAdapter {
         Gdx.app.log("addFood", String.format("x=%.2f, y=%.2f", x, y));
     }
 
-    private void draw() {
-
+    private void clearScreen() {
         Gdx.gl.glClearColor(0.4f, 1, 0.4f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+    }
+
+    private void draw() {
 
         batch.setProjectionMatrix(camera.projection);
         batch.setTransformMatrix(camera.view);
@@ -609,7 +601,7 @@ public class MainScreen extends ScreenAdapter {
 
         drawBodyPart(snake.head());
 
-        if (gameIsOver) {
+        if (state == STATE.GAME_OVER) {
 
             String s = "Game Over";
 
@@ -700,5 +692,9 @@ public class MainScreen extends ScreenAdapter {
         scoreFont.dispose();
         batch.dispose();
         shapeRenderer.dispose();
+    }
+
+    private enum STATE {
+        PLAYING, PAUSED, GAME_OVER
     }
 }
