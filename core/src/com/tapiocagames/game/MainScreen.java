@@ -62,7 +62,6 @@ public class MainScreen extends ScreenAdapter {
     private Texture bgTexture;
     private Texture foodTexture1;
     private int score;
-    private boolean restart;
     private int numCellsX;
     private int numCellsY;
     private BodyPart newBodyPart;
@@ -166,7 +165,6 @@ public class MainScreen extends ScreenAdapter {
         state = STATE.PLAYING;
         bgAudio.play();
         specialHandler.stop();
-        restart = false;
         gameOverTimer = 0;
         score = 0;
         time = 0;
@@ -208,11 +206,7 @@ public class MainScreen extends ScreenAdapter {
 
             boolean enter = Gdx.input.isKeyJustPressed(Input.Keys.ENTER);
 
-            if (enter) {
-                restart = true;
-            }
-
-            if (restart && System.currentTimeMillis() - gameOverTimer > 7000) {
+            if (enter && System.currentTimeMillis() - gameOverTimer > 7000) {
                 restartGame();
             }
         } else if (state == STATE.PAUSED) {
@@ -263,12 +257,11 @@ public class MainScreen extends ScreenAdapter {
             return;
         }
 
+        executedGameOver = true;
         bgAudio.stop();
 
         gameOverTimer = System.currentTimeMillis();
         gameOverSound.play();
-
-        executedGameOver = true;
     }
 
     private void queryInput() {
