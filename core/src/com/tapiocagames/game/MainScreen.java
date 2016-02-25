@@ -90,7 +90,7 @@ public class MainScreen extends ScreenAdapter {
 
         bgAudio = Gdx.audio.newMusic(Gdx.files.internal("mandioca-loop.ogg"));
         bgAudio.setLooping(true);
-        bgAudio.setVolume(0.08f);
+        bgAudio.setVolume(0.04f);
 
 //        camera.zoom = 1.1f;
 //        camera.update();
@@ -198,8 +198,6 @@ public class MainScreen extends ScreenAdapter {
     public void render(float delta) {
         super.render(delta);
 
-        queryInput();
-
         if (state == STATE.GAME_OVER) {
 
             gameOver();
@@ -225,7 +223,10 @@ public class MainScreen extends ScreenAdapter {
 
                 state = STATE.PAUSED;
                 pause();
+                
             } else {
+
+                queryInput();
 
                 timeSpentUntilNextMove += delta;
                 time += delta;
