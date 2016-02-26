@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -37,7 +38,7 @@ public class MainScreen extends ScreenAdapter {
     private static final float WORLD_HEIGHT = 480.0f;
     private static final float INITIAL_WALK_TIME = 0.4f;
     private static final float SPECIAL_TIME_HOP = 1.0f;
-    private final Game game;
+    private final SnakeRousseffGame game;
     private Batch batch;
     private ShapeRenderer shapeRenderer;
     private long gameOverTimer;
@@ -77,18 +78,20 @@ public class MainScreen extends ScreenAdapter {
     private Music bgAudio;
     private STATE state = STATE.PLAYING;
 
-    public MainScreen(Game game) {
+    public MainScreen(SnakeRousseffGame game) {
         this.game = game;
     }
 
     @Override
     public void show() {
 
+        AssetManager assetManager = game.getAssetManager();
+
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
         camera.update();
 
-        bgAudio = Gdx.audio.newMusic(Gdx.files.internal("mandioca-loop.ogg"));
+        bgAudio = assetManager.get("mandioca-loop.ogg", Music.class);
         bgAudio.setLooping(true);
         bgAudio.setVolume(0.04f);
 
@@ -117,9 +120,10 @@ public class MainScreen extends ScreenAdapter {
         }
 
         specialHandler = new SpecialHandler(viewport);
-        bgTexture = new Texture("bg-grass-and-holes.png");
-        foodTexture1 = new Texture("food1.png");
-        specialFoodTexture = new Texture("special-food1.png");
+
+        bgTexture = assetManager.get("bg-grass-and-holes.png", Texture.class);
+        foodTexture1 = assetManager.get("food1.png", Texture.class);
+        specialFoodTexture = assetManager.get("special-food1.png", Texture.class);
 
         numCellsX = (int) MathUtils.floor(viewport.getWorldWidth() / CELL_WIDTH);
         numCellsY = (int) MathUtils.floor(viewport.getWorldHeight() / CELL_HEIGHT);
@@ -140,10 +144,10 @@ public class MainScreen extends ScreenAdapter {
             hitObjects.add(food);
         }
 
-        thead = new Texture("head.png");
-        tchest = new Texture("chest.png");
-        tfeet = new Texture("feet.png");
-        tbody = new Texture("body.png");
+        thead = assetManager.get("head.png");
+        tchest = assetManager.get("chest.png");
+        tfeet = assetManager.get("feet.png");
+        tbody = assetManager.get("body.png");
 
         glyphLayout = new GlyphLayout();
         shapeRenderer = new ShapeRenderer();
@@ -154,8 +158,8 @@ public class MainScreen extends ScreenAdapter {
             hitObjects.add(snake.bodyParts.get(i));
         }
 
-        gameOverSound = Gdx.audio.newSound(Gdx.files.internal("game-over.ogg"));
-        eatFoodSound = Gdx.audio.newSound(Gdx.files.internal("plin.ogg"));
+        gameOverSound = assetManager.get("game-over.ogg");
+        eatFoodSound = assetManager.get("plin.ogg");
 
         restartGame();
     }
@@ -223,7 +227,6 @@ public class MainScreen extends ScreenAdapter {
 
                 state = STATE.PAUSED;
                 pause();
-
             } else {
 
                 queryInput();

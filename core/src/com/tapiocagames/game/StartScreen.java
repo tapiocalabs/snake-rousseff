@@ -4,6 +4,7 @@ import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
@@ -25,7 +26,7 @@ public class StartScreen extends ScreenAdapter {
     private static final float WORLD_WIDTH = 640.0f;
     private static final float WORLD_HEIGHT = 480.0f;
 
-    private final Game game;
+    private final SnakeRousseffGame game;
 
     private Stage stage;
     private Music bgAudio;
@@ -34,7 +35,7 @@ public class StartScreen extends ScreenAdapter {
     private Texture playUpTexture;
     private Texture playDownTexture;
 
-    public StartScreen(Game game) {
+    public StartScreen(SnakeRousseffGame game) {
         this.game = game;
     }
 
@@ -44,14 +45,16 @@ public class StartScreen extends ScreenAdapter {
         stage = new Stage(new FitViewport(WORLD_WIDTH, WORLD_HEIGHT));
         Gdx.input.setInputProcessor(stage);
 
-        bgAudio = Gdx.audio.newMusic(Gdx.files.internal("mandioca-loop.ogg"));
+        AssetManager assetManager = game.getAssetManager();
+
+        bgAudio = assetManager.get("mandioca-loop.ogg");
         bgAudio.setLooping(true);
         bgAudio.setVolume(0.3f);
 
-        bgTexture = new Texture(Gdx.files.internal("bg.png"));
-        logoTexture = new Texture(Gdx.files.internal("start-screen-logo.png"));
-        playDownTexture = new Texture(Gdx.files.internal("play-down.png"));
-        playUpTexture = new Texture(Gdx.files.internal("play-up.png"));
+        bgTexture = assetManager.get("bg.png");
+        logoTexture = assetManager.get("start-screen-logo.png");
+        playDownTexture = assetManager.get("play-down.png");
+        playUpTexture = assetManager.get("play-up.png");
 
         ImageButton playButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(playUpTexture)),
                 new TextureRegionDrawable(new TextureRegion(playDownTexture)));
