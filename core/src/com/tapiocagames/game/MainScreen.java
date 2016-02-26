@@ -223,7 +223,7 @@ public class MainScreen extends ScreenAdapter {
 
                 state = STATE.PAUSED;
                 pause();
-                
+
             } else {
 
                 queryInput();
