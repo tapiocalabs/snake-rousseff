@@ -91,6 +91,8 @@ public class MainScreen extends ScreenAdapter {
         camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
         camera.update();
 
+        viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
+
         bgAudio = assetManager.get("mandioca-loop.ogg", Music.class);
         bgAudio.setLooping(true);
         bgAudio.setVolume(0.04f);
@@ -98,8 +100,6 @@ public class MainScreen extends ScreenAdapter {
 //        camera.zoom = 1.1f;
 //        camera.update();
 //        cam.zoom = MathUtils.clamp(cam.zoom, 0.1f, 100/cam.viewportWidth);
-
-        viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
 
         {
             FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("arcade-classic.ttf"));
