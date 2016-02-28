@@ -57,6 +57,7 @@ public class LoadingScreen extends ScreenAdapter {
         assetManager.load("special-food1.png", Texture.class);
 
         assetManager.load("head.png", Texture.class);
+        assetManager.load("head-hurt.png", Texture.class);
         assetManager.load("chest.png", Texture.class);
         assetManager.load("feet.png", Texture.class);
         assetManager.load("body.png", Texture.class);

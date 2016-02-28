@@ -51,6 +51,7 @@ public class MainScreen extends ScreenAdapter {
     private Sound gameOverSound;
     private Sound eatFoodSound;
     private Texture thead;
+    private Texture theadHurt;
     private Texture tchest;
     private Texture tbody;
     private Texture tfeet;
@@ -145,6 +146,7 @@ public class MainScreen extends ScreenAdapter {
         }
 
         thead = assetManager.get("head.png");
+        theadHurt = assetManager.get("head-hurt.png");
         tchest = assetManager.get("chest.png");
         tfeet = assetManager.get("feet.png");
         tbody = assetManager.get("body.png");
@@ -182,7 +184,7 @@ public class MainScreen extends ScreenAdapter {
         float midX = MathUtils.floor(numCellsX / 2) * CELL_WIDTH;
         float midY = MathUtils.floor(numCellsY / 2) * CELL_HEIGHT;
 
-        snake.setup(midX, midY, thead, tchest, tfeet);
+        snake.setup(midX, midY, thead, theadHurt, tchest, tfeet);
 
         specialFood.set(-100, -100, null);
 
@@ -239,7 +241,7 @@ public class MainScreen extends ScreenAdapter {
 
                     move();
                     checkCollisions();
-
+                    snake.update(delta);
                     changedDirection = false;
                 }
 
@@ -398,7 +400,6 @@ public class MainScreen extends ScreenAdapter {
         }
 
         if (collidedToSpecial) {
-
             collidedToSpecial();
         } else {
 
@@ -427,6 +428,7 @@ public class MainScreen extends ScreenAdapter {
 
                     if (bodyPart.x == head.x && bodyPart.y == head.y) {
                         state = STATE.GAME_OVER;
+                        snake.collidedHurt();
                         break l1;
                     }
                 }

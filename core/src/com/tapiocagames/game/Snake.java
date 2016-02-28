@@ -18,6 +18,9 @@ public class Snake {
     public static final int RIGHT = 3;
 
     List<BodyPart> bodyParts;
+    private Texture headHurt;
+    private Texture head;
+    private float timeHurt = 0.0f;
 
     public Snake() {
 
@@ -37,11 +40,14 @@ public class Snake {
         bodyParts.add(feet);
     }
 
-    public void setup(float x, float y, Texture thead, Texture tchest, Texture tfeet) {
+    public void setup(float x, float y, Texture thead, Texture theadHurt, Texture tchest, Texture tfeet) {
 
         while (bodyParts.size() > 3) {
             bodyParts.remove(bodyParts.size() - 2);
         }
+
+        headHurt = theadHurt;
+        head = thead;
 
         BodyPart head = bodyParts.get(0);
         head.texture = thead;
@@ -64,5 +70,24 @@ public class Snake {
 
     public BodyPart head() {
         return bodyParts.get(0);
+    }
+
+    public void collidedHurt() {
+        timeHurt = 0;
+    }
+
+    public void update(float delta) {
+        if (timeHurt >= 0) {
+            timeHurt += delta;
+        }
+
+        if (timeHurt > 5) {
+            timeHurt = -1;
+            bodyParts.get(0).texture = head;
+        }
+
+        if (timeHurt > 0) {
+            bodyParts.get(0).texture = headHurt;
+        }
     }
 }
