@@ -20,7 +20,7 @@ public class Snake {
     List<BodyPart> bodyParts;
     private Texture headHurt;
     private Texture head;
-    private float timeHurt = 0.0f;
+    private float timeHurt = -1.0f;
 
     public Snake() {
 
@@ -45,6 +45,8 @@ public class Snake {
         while (bodyParts.size() > 3) {
             bodyParts.remove(bodyParts.size() - 2);
         }
+
+        timeHurt = -1.0f;
 
         headHurt = theadHurt;
         head = thead;
