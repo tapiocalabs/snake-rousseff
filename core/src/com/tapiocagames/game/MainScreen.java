@@ -108,7 +108,7 @@ public class MainScreen extends ScreenAdapter {
             parameter.size = 28;
             scoreFont = generator.generateFont(parameter);
             scoreFont.setColor(Color.GOLDENROD);
-            generator.dispose(); // don't forget to dispose to avoid memory leaks!
+            generator.dispose();
         }
 
         {
@@ -117,7 +117,7 @@ public class MainScreen extends ScreenAdapter {
             parameter.size = 56;
             gameOverFont = generator.generateFont(parameter);
             gameOverFont.setColor(Color.DARK_GRAY);
-            generator.dispose(); // don't forget to dispose to avoid memory leaks!
+            generator.dispose();
         }
 
         specialHandler = new SpecialHandler(viewport);
