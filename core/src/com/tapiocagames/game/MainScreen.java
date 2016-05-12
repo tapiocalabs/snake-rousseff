@@ -103,11 +103,11 @@ public class MainScreen extends ScreenAdapter {
 //        cam.zoom = MathUtils.clamp(cam.zoom, 0.1f, 100/cam.viewportWidth);
 
         {
-            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("arcade-classic.ttf"));
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("dk-prince-frog.otf"));
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
             parameter.size = 28;
             scoreFont = generator.generateFont(parameter);
-            scoreFont.setColor(Color.GOLDENROD);
+            scoreFont.setColor(Color.WHITE);
             generator.dispose();
         }
 
